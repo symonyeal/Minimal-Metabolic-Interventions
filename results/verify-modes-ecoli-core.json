@@ -1,0 +1,11 @@
+{
+ "modes": 100274,
+ "distinct_supports": 100274,
+ "float_failures": 0,
+ "first_failures": [],
+ "min_kept_singular_value": 0.0012765466095567637,
+ "max_dropped_singular_value": 6.017604851768565e-14,
+ "exact_sample": 500,
+ "exact_failures": 0,
+ "sample_seed": 20261027
+}

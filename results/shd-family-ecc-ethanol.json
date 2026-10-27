@@ -1,0 +1,11 @@
+{
+ "instance": "ecc-ethanol",
+ "mcs_status": "complete",
+ "mcs": 34389,
+ "shd": 34389,
+ "missing": 0,
+ "extra": 0,
+ "exact_match": true,
+ "mcs_s_with_output": 2.506,
+ "shd_s_with_output": 9.12
+}

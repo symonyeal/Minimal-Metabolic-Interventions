@@ -1,0 +1,54 @@
+[
+ {
+  "instance": "ecc-ethanol",
+  "ord": "idx",
+  "twins": false,
+  "status": "complete",
+  "nodes": 278670,
+  "solutions": "34389",
+  "dead": 0.8100764344924104,
+  "ex": 0.37637348835540246,
+  "ex_dead_nodes": 86182,
+  "wl": 0.5323500915060825,
+  "search_s": 96.18024
+ },
+ {
+  "instance": "ecc-ethanol",
+  "ord": "idx",
+  "twins": true,
+  "status": "complete",
+  "nodes": 48262,
+  "solutions": "34389",
+  "dead": 0.8049604243504206,
+  "ex": 0.42333512908706644,
+  "ex_dead_nodes": 17107,
+  "wl": 0.4869669719448013,
+  "search_s": 21.4229643
+ },
+ {
+  "instance": "ecc-ethanol",
+  "ord": "unhit",
+  "twins": false,
+  "status": "complete",
+  "nodes": 210230,
+  "solutions": "34389",
+  "dead": 0.7535984398040242,
+  "ex": 0.3129191837511297,
+  "ex_dead_nodes": 54015,
+  "wl": 0.482276554250107,
+  "search_s": 79.1958941
+ },
+ {
+  "instance": "ecc-ethanol",
+  "ord": "unhit",
+  "twins": true,
+  "status": "complete",
+  "nodes": 41948,
+  "solutions": "34389",
+  "dead": 0.777700963097168,
+  "ex": 0.359039763516735,
+  "ex_dead_nodes": 13171,
+  "wl": 0.4266711166205779,
+  "search_s": 30.0559208
+ }
+]

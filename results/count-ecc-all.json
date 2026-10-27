@@ -1,0 +1,49 @@
+{
+  "census": null,
+  "counts": {
+    "expanded_solutions": "3545843",
+    "nodes": 648047,
+    "representative_solutions": 18166
+  },
+  "elapsed_s": {
+    "first_solution": 0.0066176,
+    "load_normalize": 21.8952398,
+    "search": 19.2828924,
+    "total": 41.4000673
+  },
+  "input": {
+    "dup_ids_in_edges": 0,
+    "duplicate_rows_merged": 0,
+    "empty_edge": false,
+    "format": "mcs-hg/1",
+    "normalized_edges": 100274,
+    "path": "runs/ecc/ecc-all.json",
+    "raw_edges": 100274,
+    "sha256_bytes": "0244459fe91871e4287161904e017d61bfd1b7c14a1f765a15dfb121a741f7e1",
+    "sha256_normalized": "bd8e7f538ef383584d16062da8dc5072cca913bde8bfb7b19863b85aacb59706",
+    "superset_rows_dropped": 0,
+    "vertices": 87
+  },
+  "limit": null,
+  "method": {
+    "alg": "mmcs",
+    "cap": null,
+    "census": false,
+    "check": false,
+    "count_only": true,
+    "k": null,
+    "ord": "unhit",
+    "time_limit_s": 120.0,
+    "twins": true
+  },
+  "peak_memory": "not measured",
+  "reduction": {
+    "classes": 55,
+    "nontrivial_classes": 22
+  },
+  "search_status": "complete",
+  "tool": "mcs",
+  "verification": null,
+  "verification_status": "not_run",
+  "version": "0.1.0"
+}
