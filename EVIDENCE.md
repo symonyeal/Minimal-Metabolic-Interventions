@@ -12,7 +12,7 @@ and rebuilds every input below into `data/` and stops on a hash mismatch.
 | E. coli METATOOL modes, five substrates (lineage A) | `VeraLiconaResearchGroup/MHSGenerationAlgorithms` @ `f043cc3`, `benchmark_inputs/ecoli/*.json` → `data/a/` | acetate `bf5f50c5…`, succinate `8ad10e58…`, glycerol `a0b1afc2…`, glucose `a666e621…`, combined `141f94db…` |
 | Growth-mode subsets of lineage A | `data/a/*-growth.json` (`scripts/prepare.py`) | acetate `68f10235…`, succinate `9245a42e…`, glycerol `8c1b504f…`, glucose `9f9b7d23…`, combined `1c8955f2…` |
 | BiGG `e_coli_core` (Orth et al. 2010; lineage B) | `https://bigg.ucsd.edu/static/models/e_coli_core.json` → `data/b/` | `7bedec10576cfe935b19218dc881f3fb14f890a1871448fc19a9b4ee15b448d8` |
-| Lineage B integer cone | `adapters/bigg_cone.py` | `025c8051…` |
+| Lineage B integer cone | `adapters/bigg_cone.py` | `a2851d5a…` |
 | Lineage B elementary modes | `efm` | `a6439f96…` |
 | SHD binary (Uno), MSVC `/std:clatest`, from `containers/shd/src` at the same commit | not bundled | `42cc79f1…` |
 
@@ -20,6 +20,10 @@ Lineage B is an independent reconstruction of the same organism. A different-org
 searched for and not found in tractable form: the smallest non-E. coli BiGG model
 (`iAB_RBC_283`, human erythrocyte) has a 130-dimensional flux cone kernel against 24 for
 `e_coli_core`, which puts its mode count far beyond enumeration.
+
+A fresh clone of commit `e5427b9` reproduced these input hashes with `scripts/prepare.py`, passed
+`cargo test --release`, and gave census tables identical to `results/census-lineage-a.json` and
+`results/census-lineage-b.json` on all six comparator instances.
 
 ## G1: baseline correctness
 
@@ -82,8 +86,8 @@ isomorphic pair satisfies, so it bounds isomorphic reuse from above. With twins 
 
 Without twins the WL − exact gap is 14–27%. Static twins already remove most of the symmetry an
 isomorphism test would find. After twins, isomorphism adds at most 7.1 percentage points over
-exact memoization in every case, below the 1/6 needed for the 1.2x target. By the PRD stop rule,
-isomorphic continuation reuse (claim item 1) stops here. Most remaining opportunity is in exact
+exact memoization in every case, below the 1/6 needed for the 1.2x target. By the predeclared stop rule
+([REPORT.md](REPORT.md) §1), isomorphic continuation reuse stops here. Most remaining opportunity is in exact
 repeats and dead subtrees: on B ethanol 13,171 of 41,948 nodes (31%) lie in exact repeats of dead
 states. The B growth census did not finish within 240 s and is not reported.
 
