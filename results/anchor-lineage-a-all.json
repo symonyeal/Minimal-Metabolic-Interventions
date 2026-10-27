@@ -1,0 +1,290 @@
+{
+ "limit_s": 15.0,
+ "reps": 1,
+ "results": [
+  {
+   "instance": "ecoli-acetate",
+   "edges": 266,
+   "runs": {
+    "mcs_mmcs_idx": {
+     "status": "complete",
+     "solutions": 3363,
+     "times_s": [
+      0.11184150003828108
+     ],
+     "median_s": 0.11184150003828108
+    },
+    "mcs_mmcs_unhit": {
+     "status": "complete",
+     "solutions": 3363,
+     "times_s": [
+      0.09999820007942617
+     ],
+     "median_s": 0.09999820007942617
+    },
+    "mcs_mmcs_unhit_twins": {
+     "status": "complete",
+     "solutions": 3363,
+     "times_s": [
+      0.09003879991360009
+     ],
+     "median_s": 0.09003879991360009
+    },
+    "mcs_rs": {
+     "status": "complete",
+     "solutions": 3363,
+     "times_s": [
+      0.4157501000445336
+     ],
+     "median_s": 0.4157501000445336
+    },
+    "shd_0": {
+     "status": "complete",
+     "solutions": 3363,
+     "times_s": [
+      0.1085181999951601
+     ],
+     "median_s": 0.1085181999951601
+    },
+    "shd_D": {
+     "status": "complete",
+     "solutions": 3363,
+     "times_s": [
+      0.09158549993298948
+     ],
+     "median_s": 0.09158549993298948
+    }
+   },
+   "family_vs_shd": {
+    "mcs": 3363,
+    "shd": 3363,
+    "missing": 0,
+    "extra": 0,
+    "exact_match": true
+   }
+  },
+  {
+   "instance": "ecoli-succinate",
+   "edges": 932,
+   "runs": {
+    "mcs_mmcs_idx": {
+     "status": "complete",
+     "solutions": 14136,
+     "times_s": [
+      0.19013480003923178
+     ],
+     "median_s": 0.19013480003923178
+    },
+    "mcs_mmcs_unhit": {
+     "status": "complete",
+     "solutions": 14136,
+     "times_s": [
+      0.24322339985519648
+     ],
+     "median_s": 0.24322339985519648
+    },
+    "mcs_mmcs_unhit_twins": {
+     "status": "complete",
+     "solutions": 14136,
+     "times_s": [
+      0.08033289993181825
+     ],
+     "median_s": 0.08033289993181825
+    },
+    "mcs_rs": {
+     "status": "complete",
+     "solutions": 14136,
+     "times_s": [
+      4.839782000053674
+     ],
+     "median_s": 4.839782000053674
+    },
+    "shd_0": {
+     "status": "complete",
+     "solutions": 14136,
+     "times_s": [
+      0.4694548000115901
+     ],
+     "median_s": 0.4694548000115901
+    },
+    "shd_D": {
+     "status": "complete",
+     "solutions": 14136,
+     "times_s": [
+      0.24700709991157055
+     ],
+     "median_s": 0.24700709991157055
+    }
+   },
+   "family_vs_shd": {
+    "mcs": 14136,
+    "shd": 14136,
+    "missing": 0,
+    "extra": 0,
+    "exact_match": true
+   }
+  },
+  {
+   "instance": "ecoli-glycerol",
+   "edges": 2128,
+   "runs": {
+    "mcs_mmcs_idx": {
+     "status": "complete",
+     "solutions": 25619,
+     "times_s": [
+      0.5143340998329222
+     ],
+     "median_s": 0.5143340998329222
+    },
+    "mcs_mmcs_unhit": {
+     "status": "complete",
+     "solutions": 25619,
+     "times_s": [
+      0.6376211999449879
+     ],
+     "median_s": 0.6376211999449879
+    },
+    "mcs_mmcs_unhit_twins": {
+     "status": "complete",
+     "solutions": 25619,
+     "times_s": [
+      0.13007550011388958
+     ],
+     "median_s": 0.13007550011388958
+    },
+    "mcs_rs": {
+     "status": "timeout",
+     "solutions": null,
+     "times_s": [],
+     "median_s": null
+    },
+    "shd_0": {
+     "status": "complete",
+     "solutions": 25619,
+     "times_s": [
+      1.4303478999063373
+     ],
+     "median_s": 1.4303478999063373
+    },
+    "shd_D": {
+     "status": "complete",
+     "solutions": 25619,
+     "times_s": [
+      0.5422515999525785
+     ],
+     "median_s": 0.5422515999525785
+    }
+   },
+   "family_vs_shd": {
+    "mcs": 25619,
+    "shd": 25619,
+    "missing": 0,
+    "extra": 0,
+    "exact_match": true
+   }
+  },
+  {
+   "instance": "ecoli-glucose",
+   "edges": 6387,
+   "runs": {
+    "mcs_mmcs_idx": {
+     "status": "complete",
+     "solutions": 21001,
+     "times_s": [
+      1.0961280001793057
+     ],
+     "median_s": 1.0961280001793057
+    },
+    "mcs_mmcs_unhit": {
+     "status": "complete",
+     "solutions": 21001,
+     "times_s": [
+      1.0335776000283659
+     ],
+     "median_s": 1.0335776000283659
+    },
+    "mcs_mmcs_unhit_twins": {
+     "status": "complete",
+     "solutions": 21001,
+     "times_s": [
+      0.1889845000114292
+     ],
+     "median_s": 0.1889845000114292
+    },
+    "mcs_rs": {
+     "status": "timeout",
+     "solutions": null,
+     "times_s": [],
+     "median_s": null
+    },
+    "shd_0": {
+     "status": "complete",
+     "solutions": 21001,
+     "times_s": [
+      3.3059839999768883
+     ],
+     "median_s": 3.3059839999768883
+    },
+    "shd_D": {
+     "status": "complete",
+     "solutions": 21001,
+     "times_s": [
+      3.640000200131908
+     ],
+     "median_s": 3.640000200131908
+    }
+   },
+   "family_vs_shd": {
+    "mcs": 21001,
+    "shd": 21001,
+    "missing": 0,
+    "extra": 0,
+    "exact_match": true
+   }
+  },
+  {
+   "instance": "ecoli-combined",
+   "edges": 27503,
+   "runs": {
+    "mcs_mmcs_idx": {
+     "status": "timeout",
+     "solutions": null,
+     "times_s": [],
+     "median_s": null
+    },
+    "mcs_mmcs_unhit": {
+     "status": "timeout",
+     "solutions": null,
+     "times_s": [],
+     "median_s": null
+    },
+    "mcs_mmcs_unhit_twins": {
+     "status": "complete",
+     "solutions": 275914,
+     "times_s": [
+      3.17255560006015
+     ],
+     "median_s": 3.17255560006015
+    },
+    "mcs_rs": {
+     "status": "timeout",
+     "solutions": null,
+     "times_s": [],
+     "median_s": null
+    },
+    "shd_0": {
+     "status": "timeout",
+     "solutions": null,
+     "times_s": [],
+     "median_s": null
+    },
+    "shd_D": {
+     "status": "timeout",
+     "solutions": null,
+     "times_s": [],
+     "median_s": null
+    }
+   }
+  }
+ ]
+}

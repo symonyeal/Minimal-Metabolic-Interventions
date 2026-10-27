@@ -1,0 +1,367 @@
+{
+ "limit_s": 15.0,
+ "reps": 3,
+ "results": [
+  {
+   "instance": "ecoli-acetate-growth",
+   "edges": 30,
+   "runs": {
+    "mcs_mmcs_idx": {
+     "status": "complete",
+     "solutions": 617,
+     "times_s": [
+      0.055935399839654565,
+      0.05476449988782406,
+      0.054196800105273724
+     ],
+     "median_s": 0.05476449988782406
+    },
+    "mcs_mmcs_unhit": {
+     "status": "complete",
+     "solutions": 617,
+     "times_s": [
+      0.05572870001196861,
+      0.05139690008945763,
+      0.05271870014257729
+     ],
+     "median_s": 0.05271870014257729
+    },
+    "mcs_mmcs_unhit_twins": {
+     "status": "complete",
+     "solutions": 617,
+     "times_s": [
+      0.05072269984520972,
+      0.049920700024813414,
+      0.05394800007343292
+     ],
+     "median_s": 0.05072269984520972
+    },
+    "mcs_rs": {
+     "status": "complete",
+     "solutions": 617,
+     "times_s": [
+      0.05215879995375872,
+      0.0531338001601398,
+      0.051717499969527125
+     ],
+     "median_s": 0.05215879995375872
+    },
+    "shd_0": {
+     "status": "complete",
+     "solutions": 617,
+     "times_s": [
+      0.04644910013303161,
+      0.046002999879419804,
+      0.04873040015809238
+     ],
+     "median_s": 0.04644910013303161
+    },
+    "shd_D": {
+     "status": "complete",
+     "solutions": 617,
+     "times_s": [
+      0.047870999900624156,
+      0.044573099818080664,
+      0.04747819993644953
+     ],
+     "median_s": 0.04747819993644953
+    }
+   },
+   "family_vs_shd": {
+    "mcs": 617,
+    "shd": 617,
+    "missing": 0,
+    "extra": 0,
+    "exact_match": true
+   }
+  },
+  {
+   "instance": "ecoli-succinate-growth",
+   "edges": 103,
+   "runs": {
+    "mcs_mmcs_idx": {
+     "status": "complete",
+     "solutions": 4778,
+     "times_s": [
+      0.05986170005053282,
+      0.062344000209122896,
+      0.06294810003601015
+     ],
+     "median_s": 0.062344000209122896
+    },
+    "mcs_mmcs_unhit": {
+     "status": "complete",
+     "solutions": 4778,
+     "times_s": [
+      0.059556900057941675,
+      0.057257500011473894,
+      0.05877040000632405
+     ],
+     "median_s": 0.05877040000632405
+    },
+    "mcs_mmcs_unhit_twins": {
+     "status": "complete",
+     "solutions": 4778,
+     "times_s": [
+      0.048462999984622,
+      0.04864679998718202,
+      0.05024240002967417
+     ],
+     "median_s": 0.04864679998718202
+    },
+    "mcs_rs": {
+     "status": "complete",
+     "solutions": 4778,
+     "times_s": [
+      0.08399879978969693,
+      0.07962199999019504,
+      0.08583340002223849
+     ],
+     "median_s": 0.08399879978969693
+    },
+    "shd_0": {
+     "status": "complete",
+     "solutions": 4778,
+     "times_s": [
+      0.04953900002874434,
+      0.050680299988016486,
+      0.047625500010326505
+     ],
+     "median_s": 0.04953900002874434
+    },
+    "shd_D": {
+     "status": "complete",
+     "solutions": 4778,
+     "times_s": [
+      0.049416800029575825,
+      0.04715940007008612,
+      0.048371999990195036
+     ],
+     "median_s": 0.048371999990195036
+    }
+   },
+   "family_vs_shd": {
+    "mcs": 4778,
+    "shd": 4778,
+    "missing": 0,
+    "extra": 0,
+    "exact_match": true
+   }
+  },
+  {
+   "instance": "ecoli-glycerol-growth",
+   "edges": 274,
+   "runs": {
+    "mcs_mmcs_idx": {
+     "status": "complete",
+     "solutions": 9346,
+     "times_s": [
+      0.07801020005717874,
+      0.0839043001178652,
+      0.08282019989565015
+     ],
+     "median_s": 0.08282019989565015
+    },
+    "mcs_mmcs_unhit": {
+     "status": "complete",
+     "solutions": 9346,
+     "times_s": [
+      0.07915439992211759,
+      0.07719310000538826,
+      0.07809159997850657
+     ],
+     "median_s": 0.07809159997850657
+    },
+    "mcs_mmcs_unhit_twins": {
+     "status": "complete",
+     "solutions": 9346,
+     "times_s": [
+      0.05364760011434555,
+      0.05695910006761551,
+      0.05365610006265342
+     ],
+     "median_s": 0.05365610006265342
+    },
+    "mcs_rs": {
+     "status": "complete",
+     "solutions": 9346,
+     "times_s": [
+      0.3901409001555294,
+      0.3609384000301361,
+      0.3565317001193762
+     ],
+     "median_s": 0.3609384000301361
+    },
+    "shd_0": {
+     "status": "complete",
+     "solutions": 9346,
+     "times_s": [
+      0.07251399988308549,
+      0.07066780002787709,
+      0.06987309991382062
+     ],
+     "median_s": 0.07066780002787709
+    },
+    "shd_D": {
+     "status": "complete",
+     "solutions": 9346,
+     "times_s": [
+      0.05646830005571246,
+      0.059737199917435646,
+      0.05481359991244972
+     ],
+     "median_s": 0.05646830005571246
+    }
+   },
+   "family_vs_shd": {
+    "mcs": 9346,
+    "shd": 9346,
+    "missing": 0,
+    "extra": 0,
+    "exact_match": true
+   }
+  },
+  {
+   "instance": "ecoli-glucose-growth",
+   "edges": 879,
+   "runs": {
+    "mcs_mmcs_idx": {
+     "status": "complete",
+     "solutions": 9374,
+     "times_s": [
+      0.1307620001025498,
+      0.1284928999375552,
+      0.13446820015087724
+     ],
+     "median_s": 0.1307620001025498
+    },
+    "mcs_mmcs_unhit": {
+     "status": "complete",
+     "solutions": 9374,
+     "times_s": [
+      0.13077669986523688,
+      0.12479539983905852,
+      0.12006490002386272
+     ],
+     "median_s": 0.12479539983905852
+    },
+    "mcs_mmcs_unhit_twins": {
+     "status": "complete",
+     "solutions": 9374,
+     "times_s": [
+      0.06464140000753105,
+      0.06580830016173422,
+      0.06772029981948435
+     ],
+     "median_s": 0.06580830016173422
+    },
+    "mcs_rs": {
+     "status": "complete",
+     "solutions": 9374,
+     "times_s": [
+      0.6612794999964535,
+      0.7009048999752849,
+      0.7337154000997543
+     ],
+     "median_s": 0.7009048999752849
+    },
+    "shd_0": {
+     "status": "complete",
+     "solutions": 9374,
+     "times_s": [
+      0.1310628999490291,
+      0.1351377998944372,
+      0.12637059995904565
+     ],
+     "median_s": 0.1310628999490291
+    },
+    "shd_D": {
+     "status": "complete",
+     "solutions": 9374,
+     "times_s": [
+      0.14858310017734766,
+      0.15135209984146059,
+      0.14580940012820065
+     ],
+     "median_s": 0.14858310017734766
+    }
+   },
+   "family_vs_shd": {
+    "mcs": 9374,
+    "shd": 9374,
+    "missing": 0,
+    "extra": 0,
+    "exact_match": true
+   }
+  },
+  {
+   "instance": "ecoli-combined-growth",
+   "edges": 2891,
+   "runs": {
+    "mcs_mmcs_idx": {
+     "status": "complete",
+     "solutions": 73760,
+     "times_s": [
+      1.8137314000632614,
+      1.8157353999558836,
+      1.7778592000249773
+     ],
+     "median_s": 1.8137314000632614
+    },
+    "mcs_mmcs_unhit": {
+     "status": "complete",
+     "solutions": 73760,
+     "times_s": [
+      1.1119701000861824,
+      1.1092685000039637,
+      1.1067681999411434
+     ],
+     "median_s": 1.1092685000039637
+    },
+    "mcs_mmcs_unhit_twins": {
+     "status": "complete",
+     "solutions": 73760,
+     "times_s": [
+      0.141199299832806,
+      0.14660999993793666,
+      0.13917550002224743
+     ],
+     "median_s": 0.141199299832806
+    },
+    "mcs_rs": {
+     "status": "timeout",
+     "solutions": null,
+     "times_s": [],
+     "median_s": null
+    },
+    "shd_0": {
+     "status": "complete",
+     "solutions": 73760,
+     "times_s": [
+      2.471418400062248,
+      2.4968729000538588,
+      2.543022899888456
+     ],
+     "median_s": 2.4968729000538588
+    },
+    "shd_D": {
+     "status": "complete",
+     "solutions": 73760,
+     "times_s": [
+      4.344908999977633,
+      4.125184299889952,
+      4.0893631998915225
+     ],
+     "median_s": 4.125184299889952
+    }
+   },
+   "family_vs_shd": {
+    "mcs": 73760,
+    "shd": 73760,
+    "missing": 0,
+    "extra": 0,
+    "exact_match": true
+   }
+  }
+ ]
+}
