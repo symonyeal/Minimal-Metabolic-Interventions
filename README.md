@@ -1,21 +1,51 @@
 # Minimal metabolic interventions
 
-A Rust tool that enumerates inclusion-minimal hitting sets of an explicit hypergraph, used here
-for minimal reaction cut sets of metabolic networks given their elementary-mode supports. It is
-the software half of the study specified in the PRD
-(`Useful Misc/Claude Func Folder/hypergraph-project-evaluation/PRD.md`).
+`mcs` enumerates the inclusion-minimal hitting sets of an explicit hypergraph with MMCS or RS,
+checks every solution independently, and records where MMCS spends its search. `efm` computes the
+elementary modes of small metabolic networks exactly. Applied here to minimal reaction cut sets of
+two E. coli network reconstructions.
 
-Status: G1 baseline and G2 census implemented and checked on a laptop. Not published; the
-repository name, licence (proposed GPL-3.0-or-later) and release are owner decisions.
+## Background
 
-## Build
+A minimal cut set of a metabolic network is a set of reactions whose removal blocks a target
+function, such as growth or ethanol export, and that contains no smaller blocking set. If the
+elementary modes carrying the target are known, the minimal cut sets are exactly the minimal
+hitting sets of the modes' reaction supports (Haus, Klamt and Stephen 2008). Enumerating them is
+hypergraph dualization, for which MMCS (Murakami and Uno 2014) is the standard practical algorithm.
+
+## Result
+
+The census in [REPORT.md](REPORT.md) measures, without pruning, which MMCS search nodes lie in
+subtrees that emit nothing (dead) or that repeat an earlier completed state. With static twins
+merged and the unhit-degree candidate order:
+
+| Instance | Nodes | Dead | Exact repeats | Isomorphic repeats (upper bound) |
+|---|---:|---:|---:|---:|
+| A acetate-growth | 77 | 26.0% | 1.3% | 5.2% |
+| A succinate-growth | 476 | 60.3% | 15.8% | 22.3% |
+| A glycerol-growth | 1,162 | 62.8% | 18.2% | 25.3% |
+| A glucose-growth | 3,901 | 76.6% | 21.0% | 28.0% |
+| A combined-growth | 38,391 | 79.3% | 15.7% | 19.8% |
+| B ethanol | 41,948 | 77.8% | 35.9% | 42.7% |
+
+Isomorphism adds at most 7.1 percentage points over exact repeats. The study's hypothesis, reuse of
+isomorphic search states, needed 1/6 and was stopped at that gate. Most of the search lies in dead
+subtrees. Lineage A is the METATOOL network of Haus, Klamt and Stephen on five substrates; lineage B
+is BiGG `e_coli_core`, whose 100,274 elementary modes `efm` reproduces.
+
+Every enumerated family used in these tables was checked against at least one independent
+enumerator (brute force, a Berge implementation, SHD or an LP cut oracle); see
+[EVIDENCE.md](EVIDENCE.md). On combined-growth, `mcs` without twins takes 1.81 s against 2.50 s for
+SHD on the same laptop.
+
+## Usage
 
 ```text
 cargo build --release
 cargo test --release
+python -m pip install -r requirements.txt   # adapters only: numpy, scipy
+python scripts/prepare.py                   # fetch and build every input into data/
 ```
-
-## Commands
 
 ```text
 mcs inspect FILE
@@ -25,21 +55,17 @@ mcs check FILE SOLS [--ref SOLS]
 efm CONE.json MODES.jsonl SUMMARY.json
 ```
 
-- `--alg mmcs` is Murakami–Uno MMCS with the min-intersection branching edge and violator
-  pruning; `--alg rs` is their RS (without violator pruning).
-- `--ord unhit` processes branching candidates by increasing unhit degree (Hörmann–Schirneck 2026);
-  this is a reimplementation, not the authors' code.
-- `--twins` merges vertices with identical incidence and expands each solution over its classes.
-- `--k` keeps the inclusion-minimal hitting sets of size at most K (status `bounded_complete`).
-- `--check` verifies every expanded solution against the raw input rows: coverage and a private
-  witness row for each selected vertex. It shares no code with the search.
-- `--census` records, without pruning, how much of the MMCS tree lies in subtrees that are dead
-  ends or repeat an earlier completed state (exactly, or up to colour-refinement equality).
-- `efm` enumerates elementary modes of an integer cone written by `adapters/bigg_cone.py`.
+| Option | Effect |
+|---|---|
+| `--alg mmcs` | MMCS with the minimum-intersection branching edge and violator pruning (default) |
+| `--alg rs` | RS reverse search, without violator pruning; a correctness comparator |
+| `--ord unhit` | Candidates by increasing unhit degree (Hörmann and Schirneck 2026), reimplemented |
+| `--twins` | Merge vertices with identical incidence; solutions are expanded over their classes |
+| `--k K` | Only minimal hitting sets of at most K vertices (`bounded_complete`) |
+| `--check` | Verify each expanded solution against the raw rows: coverage and a private witness row per vertex |
+| `--census` | Record dead and repeated subtrees; MMCS only |
 
-## Input
-
-`mcs-hg/1` JSON:
+Input is `mcs-hg/1` JSON, or a publisher file `{"sets": [[1, 2], ...], "labels": {"1": "mue"}}`:
 
 ```json
 {"schema": "mcs-hg/1",
@@ -49,33 +75,56 @@ efm CONE.json MODES.jsonl SUMMARY.json
  "meta": {}}
 ```
 
-Publisher `{"sets": [[1, 2], ...], "labels": {"1": "mue"}}` files are read directly. Unknown ids,
-conflicting labels, malformed numbers and other schema versions are rejected. Edges are intersected
-with `eligible`. An empty edge means no solution exists; no edges means the empty set is the only
-solution. Duplicate and superset edges are dropped with their provenance kept.
+Unknown ids, conflicting labels, malformed numbers and other schema versions are rejected. Edges
+are intersected with `eligible`. An empty edge means no solution exists; no edges means the empty
+set is the only solution. Duplicate and superset edges are removed with their source rows recorded.
 
-## Output
-
-`--out` writes one JSON array of original ids per line. The summary carries `search_status`
+`--out` writes one JSON array of original ids per line. The summary reports `search_status`
 (`complete`, `bounded_complete`, `resource_limited`, `invalid_input`), `verification_status`
-(`not_run`, `passed`, `failed`), input hashes (bytes and normalized form), method settings,
-representative and expanded counts, node count, stage times and the census. It is written last
-through a rename, so a missing summary means an unfinished run. Peak memory is the process peak
-working set on Windows and is not measured on other platforms yet.
+(`not_run`, `passed`, `failed`), hashes of the input bytes and normalized form, settings,
+representative and expanded counts, nodes, stage times, the census and peak memory (Windows peak
+working set; not measured elsewhere). It is written last through a rename; a missing summary means
+an unfinished run.
 
-## Layout
+## Reproduction
+
+| Table or claim | Command |
+|---|---|
+| Tests | `cargo test --release` |
+| Inputs, lineage B modes | `python scripts/prepare.py` |
+| Mode check | `python adapters/verify_modes.py data/b/e_coli_core.json data/b/modes.jsonl 500 OUT.json` |
+| LP oracle, cuts of size ≤ 2 | `python adapters/lp_cuts.py data/b/e_coli_core.json data/b/ecc-growth.json 2 OUT.json` |
+| SHD cross-check and timing | `python bench/anchor.py target/release/mcs SHD OUT 15 3 data/a/*.json` |
+| SHD family, lineage B | `python bench/shd_family.py target/release/mcs SHD data/b/ecc-ethanol.json OUT 300` |
+| Census tables | `python bench/census.py target/release/mcs OUT 200 data/a/*-growth.json` |
+
+SHD (Uno) is not bundled; its source is in `MHSGenerationAlgorithms` under `containers/shd`, with
+its own academic-use notice. It builds with MSVC `/std:clatest` or a C compiler accepting `typeof`.
+
+## Project map
 
 | Path | Holds |
 |---|---|
-| `src/bits.rs` | Dynamic bitset |
 | `src/hg.rs` | Input contract, normalization, static twins, expansion |
 | `src/srch.rs` | MMCS, RS, census |
-| `src/chk.rs` | Independent solution checker and family comparison |
-| `src/main.rs` | `mcs` CLI |
-| `src/bin/efm.rs` | Elementary modes by nullspace double description (exact integers) |
-| `adapters/` | BiGG model to cone, mode verification, modes to hypergraph, LP cut oracle |
-| `bench/` | SHD cross-check and timing anchor, census table |
-| `tests/fam.rs` | Brute-force family tests, degenerate inputs, checker and input-contract tests |
+| `src/chk.rs` | Independent checker and family comparison |
+| `src/main.rs` | `mcs` command line |
+| `src/bin/efm.rs` | Elementary modes by nullspace double description in exact integers |
+| `adapters/` | BiGG model to cone, mode check, modes to hypergraph, LP cut oracle |
+| `bench/` | SHD comparison and timing, census tables |
+| `scripts/prepare.py` | Pinned downloads with SHA-256 checks and input construction |
+| `results/` | Frozen v0.1.0 measurements and oracle families |
 
-Input data are not bundled; see `EVIDENCE.md` for sources, hashes and the commands behind every
-reported number.
+## Limits
+
+- Two reconstructions of one organism; no claim across organisms.
+- Superset-edge removal is quadratic in the worst case: 18 of 22 s on the 83,601-edge B growth input.
+- RS lacks violator pruning and is slow. Checkpoint and resume are not implemented.
+- Times are laptop measurements including process start.
+
+## Licence and data
+
+MIT for the code in this repository. Input data are downloaded from their sources by
+`scripts/prepare.py` and not redistributed: the METATOOL mode files from
+`VeraLiconaResearchGroup/MHSGenerationAlgorithms` and the model from BiGG. Cite the original
+authors when using them.

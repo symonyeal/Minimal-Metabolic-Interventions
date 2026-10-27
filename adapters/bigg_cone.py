@@ -15,6 +15,7 @@ reaction, which the enumerator drops.
 Usage: python adapters/bigg_cone.py MODEL.json OUT.json
 """
 import hashlib, json, math, sys
+from pathlib import Path
 from fractions import Fraction
 import numpy as np
 from scipy.optimize import linprog
@@ -72,7 +73,7 @@ for j, d in col:
 rows = sorted({i for c in cols for i in c})
 A = [[c.get(i, 0) for c in cols] for i in rows]
 out = {
-    "source": src, "model_sha256": hashlib.sha256(raw).hexdigest(), "model_id": m.get("id"),
+    "source": Path(src).name, "model_sha256": hashlib.sha256(raw).hexdigest(), "model_id": m.get("id"),
     "columns": [{"reaction": rx[j]["id"], "dir": d} for j, d in col],
     "metabolites": [mets[i] for i in rows],
     "A": A,

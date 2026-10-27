@@ -11,6 +11,7 @@ empty edge (a target mode with no eligible reaction) is kept: it means no soluti
 Usage: python adapters/modes_to_hg.py MODEL.json MODES.jsonl TARGET|all POLICY OUT.json
 """
 import hashlib, json, sys
+from pathlib import Path
 
 mp, mo, T, pol, out = sys.argv[1:6]
 m = json.load(open(mp))
@@ -38,8 +39,8 @@ doc = {
     "vertices": [{"id": x, "label": rx[x].get("name") or None} for x in V],
     "edges": E,
     "eligible": el,
-    "meta": {"model": mp, "model_sha256": hashlib.sha256(open(mp, "rb").read()).hexdigest(),
-             "modes": mo, "modes_sha256": hashlib.sha256(open(mo, "rb").read()).hexdigest(),
+    "meta": {"model": Path(mp).name, "model_sha256": hashlib.sha256(open(mp, "rb").read()).hexdigest(),
+             "modes": Path(mo).name, "modes_sha256": hashlib.sha256(open(mo, "rb").read()).hexdigest(),
              "target": T, "policy": pol, "target_modes": len(E), "all_modes": len(modes)},
 }
 json.dump(doc, open(out, "w"))
