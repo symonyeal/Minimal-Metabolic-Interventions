@@ -2,19 +2,19 @@
 
 Every number below comes from a run on 2026-10-27 on the Windows 11 work laptop (Rust 1.99.1,
 Python 3.14, SciPy 1.17.1, NumPy 2.4.4, HiGHS through `linprog`). Times are laptop smoke
-measurements including process start, not benchmark-runner results. `EVAL` is
-`Useful Misc/Claude Func Folder/hypergraph-project-evaluation`.
+measurements including process start, not benchmark-runner results. `scripts/prepare.py` fetches
+and rebuilds every input below into `data/` and stops on a hash mismatch.
 
 ## Inputs
 
 | Input | Source | SHA-256 |
 |---|---|---|
-| E. coli METATOOL modes, five substrates (lineage A) | `VeraLiconaResearchGroup/MHSGenerationAlgorithms` @ `f043cc3`, `EVAL/references/.../ecoli/*.json` | acetate `bf5f50c5…`, succinate `8ad10e58…`, glycerol `a0b1afc2…`, glucose `a666e621…`, combined `141f94db…` |
-| Growth-mode subsets of lineage A | `EVAL/derived/*-growth.json` (`EVAL/audit_data.py`) | acetate `68f10235…`, succinate `9245a42e…`, glycerol `8c1b504f…`, glucose `9f9b7d23…`, combined `1c8955f2…` |
-| BiGG `e_coli_core` (Orth et al. 2010; lineage B) | `https://bigg.ucsd.edu/static/models/e_coli_core.json`, `EVAL/data/bigg-e-coli-core.json` | `7bedec10576cfe935b19218dc881f3fb14f890a1871448fc19a9b4ee15b448d8` |
+| E. coli METATOOL modes, five substrates (lineage A) | `VeraLiconaResearchGroup/MHSGenerationAlgorithms` @ `f043cc3`, `benchmark_inputs/ecoli/*.json` → `data/a/` | acetate `bf5f50c5…`, succinate `8ad10e58…`, glycerol `a0b1afc2…`, glucose `a666e621…`, combined `141f94db…` |
+| Growth-mode subsets of lineage A | `data/a/*-growth.json` (`scripts/prepare.py`) | acetate `68f10235…`, succinate `9245a42e…`, glycerol `8c1b504f…`, glucose `9f9b7d23…`, combined `1c8955f2…` |
+| BiGG `e_coli_core` (Orth et al. 2010; lineage B) | `https://bigg.ucsd.edu/static/models/e_coli_core.json` → `data/b/` | `7bedec10576cfe935b19218dc881f3fb14f890a1871448fc19a9b4ee15b448d8` |
 | Lineage B integer cone | `adapters/bigg_cone.py` | `025c8051…` |
 | Lineage B elementary modes | `efm` | `a6439f96…` |
-| SHD binary (Uno), MSVC `/std:clatest` | `EVAL/checks/shd-c23.exe` | `42cc79f1…` |
+| SHD binary (Uno), MSVC `/std:clatest`, from `containers/shd/src` at the same commit | not bundled | `42cc79f1…` |
 
 Lineage B is an independent reconstruction of the same organism. A different-organism family was
 searched for and not found in tractable form: the smallest non-E. coli BiGG model
@@ -27,8 +27,9 @@ searched for and not found in tractable form: the smallest non-E. coli BiGG mode
   on and off, census on, and k = 0–3 with a brute-force oracle on 406 hypergraphs (planted twins,
   degenerate and random), plus checker rejection of omitted, extra, duplicate and nonminimal
   solutions and the input contract.
-- Python Berge oracle (`EVAL/check_enumeration.py`): exact family match for 5 configurations on
-  small-example (5), Fano (7) and acetate-growth (617).
+- Python Berge oracle (`fka.transversal` in `symonyeal/Hypergraph-Dualization`; families in
+  `results/oracle/`): exact family match for 5 configurations on small-example (5), Fano (7) and
+  acetate-growth (617), checked with `mcs check FILE SOLS --ref results/oracle/NAME.oracle.json`.
 - SHD (`bench/anchor.py`): exact family match with Rust MMCS on all five growth instances
   (617; 4,778; 9,346; 9,374; 73,760) and on four unfiltered instances (3,363; 14,136; 25,619;
   21,001). Unfiltered combined: only Rust with twins and unhit order finished within 15 s

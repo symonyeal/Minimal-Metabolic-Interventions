@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this software or its census results, please cite it."
+title: "Minimal metabolic interventions: MMCS enumeration and a census of search effort"
+authors:
+  - family-names: Islam
+    given-names: Saimon Y.
+version: 0.1.0
+date-released: 2026-10-27
+license: MIT
+repository-code: "https://github.com/symonyeal/Minimal-Metabolic-Interventions"
