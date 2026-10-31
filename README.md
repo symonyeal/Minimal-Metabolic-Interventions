@@ -1,9 +1,8 @@
 # Minimal metabolic interventions
 
-`mcs` enumerates the inclusion-minimal hitting sets of an explicit hypergraph with MMCS or RS,
-checks every solution independently, and records where MMCS spends its search. `efm` computes the
-elementary modes of small metabolic networks exactly. Applied here to minimal reaction cut sets of
-two E. coli network reconstructions.
+`mcs` enumerates minimal hitting sets of an explicit hypergraph. `efm` computes elementary modes
+of metabolic networks using exact integer arithmetic. This repository studies MMCS search on
+minimal reaction cut sets from two reconstructions of *E. coli*.
 
 ## Background
 
@@ -15,9 +14,9 @@ hypergraph dualization, for which MMCS (Murakami and Uno 2014) is the standard p
 
 ## Result
 
-The census in [REPORT.md](REPORT.md) measures, without pruning, which MMCS search nodes lie in
-subtrees that emit nothing (dead) or that repeat an earlier completed state. With static twins
-merged and the unhit-degree candidate order:
+The census in [REPORT.md](REPORT.md) measured search nodes without pruning. It records nodes
+whose subtrees emit no solutions or repeat an earlier completed state. With static twins
+(vertices with identical incidence) merged and candidates ordered by increasing unhit degree:
 
 | Instance | Nodes | Dead | Exact repeats | Isomorphic repeats (upper bound) |
 |---|---:|---:|---:|---:|
@@ -28,10 +27,10 @@ merged and the unhit-degree candidate order:
 | A combined-growth | 38,391 | 79.3% | 15.7% | 19.8% |
 | B ethanol | 41,948 | 77.8% | 35.9% | 42.7% |
 
-Isomorphism adds at most 7.1 percentage points over exact repeats. The study's hypothesis, reuse of
-isomorphic search states, needed 1/6 and was stopped at that gate. Most of the search lies in dead
-subtrees. Lineage A is the METATOOL network of Haus, Klamt and Stephen on five substrates; lineage B
-is BiGG `e_coli_core`, whose 100,274 elementary modes `efm` reproduces.
+The possible gain from isomorphic-state reuse is at most 7.1 percentage points beyond exact
+repeats, below the predeclared 1/6 threshold; the study stopped there. Dead subtrees contain most
+search nodes. Lineage A uses the METATOOL network of Haus, Klamt and Stephen on five substrates.
+Lineage B uses BiGG `e_coli_core`; `efm` reproduces its 100,274 elementary modes.
 
 Every enumerated family used in these tables was checked against at least one independent
 enumerator (brute force, a Berge implementation, SHD or an LP cut oracle); see
