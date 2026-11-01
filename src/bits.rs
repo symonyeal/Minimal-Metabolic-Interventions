@@ -26,10 +26,6 @@ impl Bs {
     pub fn clr(&mut self, i: usize) {
         self.w[i >> 6] &= !(1 << (i & 63));
     }
-    #[inline]
-    pub fn get(&self, i: usize) -> bool {
-        self.w[i >> 6] >> (i & 63) & 1 == 1
-    }
     pub fn cnt(&self) -> u32 {
         self.w.iter().map(|x| x.count_ones()).sum()
     }
@@ -48,9 +44,6 @@ impl Bs {
     }
     pub fn and(&self, o: &Bs) -> Bs {
         Bs { w: self.w.iter().zip(&o.w).map(|(a, b)| a & b).collect() }
-    }
-    pub fn and_with(&mut self, o: &Bs) {
-        self.w.iter_mut().zip(&o.w).for_each(|(a, b)| *a &= b);
     }
     pub fn andnot_with(&mut self, o: &Bs) {
         self.w.iter_mut().zip(&o.w).for_each(|(a, b)| *a &= !b);

@@ -1,7 +1,7 @@
 # Where MMCS spends its search: a census on metabolic cut-set instances
 
-Version 0.1.0, 2026-10-27. Frozen measurement; the numbers below are reproduced by the commands in
-[EVIDENCE.md](EVIDENCE.md) and stored in [`results/`](results/).
+Version 0.1.0, 2026-10-27; reproduced exactly by v0.2.0 on 2026-10-31. The numbers below are
+reproduced by the commands in [EVIDENCE.md](EVIDENCE.md) and stored in [`results/`](results/).
 
 ## 1. Question
 
@@ -54,7 +54,7 @@ emits nothing.
 | Lineage | Source | Instances |
 |---|---|---|
 | A | METATOOL elementary modes of an E. coli central-metabolism network on five substrates (Haus, Klamt and Stephen 2008), as published in `VeraLiconaResearchGroup/MHSGenerationAlgorithms` @ `f043cc3` | Growth instances: modes containing biomass reaction `mue`, with `mue` removed; all other reactions eligible. 30, 103, 274, 879 and 2,891 edges. |
-| B | BiGG `e_coli_core` (Orth, Fleming and Palsson 2010); 100,274 elementary modes under the model's bound signs, computed here by `efm` | Ethanol instance: the 48,770 modes using `EX_etoh_e`; exchange, demand, sink, biomass and ATP maintenance reactions and reactions whose bounds exclude zero are not eligible (69 eligible). |
+| B | BiGG `e_coli_core` (Orth, Fleming and Palsson 2010); 100,274 elementary modes under the model's bound signs, computed here by `mcs modes` | Ethanol instance: the 48,770 modes using `EX_etoh_e`; exchange, demand, sink, biomass and ATP maintenance reactions and reactions whose bounds exclude zero are not eligible (69 eligible). |
 
 Lineage B is an independent reconstruction of the same organism. No tractable mode family of a
 different organism was found: the smallest non-E. coli BiGG model (`iAB_RBC_283`) has a flux-cone
@@ -69,7 +69,7 @@ kernel of dimension 130, against 24 for `e_coli_core`. No claim across organisms
 | SHD (Uno), all five A growth instances and four unfiltered A instances | Exact families (617 to 73,760) |
 | SHD, B ethanol | Exact family (34,389) |
 | LP oracle on the model, independent of the modes, B growth and ethanol, cuts of size ≤ 2 | Exact families (128, 67) |
-| `efm` mode count against the published count for `e_coli_core` | 100,274 = 100,274 |
+| `mcs modes` count against the published count for `e_coli_core` | 100,274 = 100,274 |
 | Every B mode: nullity 1 and sign-feasible null vector (500 also in exact arithmetic) | 100,274 pass |
 
 The census does not alter the search: the families with the census on equal those with it off.
@@ -118,7 +118,7 @@ Findings:
 - Two lineages, one organism. Lineage A substrates share one network and are not independent samples.
 - The B growth census (196,481 nodes) did not finish within 240 s and is not reported.
 - WL equality is an upper bound for isomorphism; exact isomorphic shares were not computed.
-- Times are from one Windows 11 laptop and include process start; no benchmark-machine runs.
+- Times are laptop measurements; no benchmark-machine runs.
 - Census shares count nodes, not time; per-node cost varies with the number of uncovered edges.
 
 ## References
