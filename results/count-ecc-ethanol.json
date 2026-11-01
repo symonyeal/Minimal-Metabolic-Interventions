@@ -6,10 +6,10 @@
     "representative_solutions": 5105
   },
   "elapsed_s": {
-    "first_solution": 0.0005296,
-    "load_normalize": 1.3300906000000001,
-    "search": 0.1560694,
-    "total": 1.5152600999999999
+    "first_solution": 0.0005724,
+    "load_normalize": 1.1368672,
+    "search": 0.1629939,
+    "total": 1.3295375
   },
   "input": {
     "dup_ids_in_edges": 0,
@@ -17,17 +17,14 @@
     "empty_edge": false,
     "format": "mcs-hg/1",
     "normalized_edges": 11600,
-    "path": "runs/ecc/ecc-ethanol.json",
+    "path": "data/b/ecc-ethanol.json",
     "raw_edges": 48770,
-    "sha256_bytes": "e99f048898ac3727b019eb4d3a86f43f023fab0b2ea06152e8a7e5194dd39c71",
+    "sha256_bytes": "09ed13161151d982dbfcc3781089df781880b02a4000445a985351d806d964d2",
     "sha256_normalized": "867c98d857a551e6e0c30ce7b87715ec0bc34b9f9591f0457cbb531b2860390f",
     "superset_rows_dropped": 37170,
     "vertices": 87
   },
-  "limit": null,
   "method": {
-    "alg": "mmcs",
-    "cap": null,
     "census": false,
     "check": false,
     "count_only": true,
@@ -36,7 +33,6 @@
     "time_limit_s": 120.0,
     "twins": true
   },
-  "peak_memory": "not measured",
   "reduction": {
     "classes": 46,
     "nontrivial_classes": 11
@@ -45,5 +41,5 @@
   "tool": "mcs",
   "verification": null,
   "verification_status": "not_run",
-  "version": "0.1.0"
+  "version": "0.2.0"
 }

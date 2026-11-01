@@ -6,10 +6,10 @@
     "representative_solutions": 4530
   },
   "elapsed_s": {
-    "first_solution": 0.0037891,
-    "load_normalize": 15.5386567,
-    "search": 3.3606727,
-    "total": 19.072471
+    "first_solution": 0.0044302,
+    "load_normalize": 9.9984306,
+    "search": 4.8998473,
+    "total": 15.0690468
   },
   "input": {
     "dup_ids_in_edges": 0,
@@ -17,17 +17,14 @@
     "empty_edge": false,
     "format": "mcs-hg/1",
     "normalized_edges": 83601,
-    "path": "runs/ecc/ecc-growth.json",
+    "path": "data/b/ecc-growth.json",
     "raw_edges": 83601,
-    "sha256_bytes": "96e086398572336e04f0e6316acc1c8b16d0bd1599cfc01bf1cea53609171adc",
+    "sha256_bytes": "eea31dbfc83d55d1ba21fd02792ed5569ec4010bf67da0c584a099039d7301ec",
     "sha256_normalized": "f5ab6211165d396341c58457ce9985b9ab6a07750253f649cb9672d2e08de48e",
     "superset_rows_dropped": 0,
     "vertices": 87
   },
-  "limit": null,
   "method": {
-    "alg": "mmcs",
-    "cap": null,
     "census": false,
     "check": false,
     "count_only": true,
@@ -36,7 +33,6 @@
     "time_limit_s": 120.0,
     "twins": true
   },
-  "peak_memory": "not measured",
   "reduction": {
     "classes": 47,
     "nontrivial_classes": 18
@@ -45,5 +41,5 @@
   "tool": "mcs",
   "verification": null,
   "verification_status": "not_run",
-  "version": "0.1.0"
+  "version": "0.2.0"
 }

@@ -1,8 +1,9 @@
 # Minimal metabolic interventions
 
-`mcs` enumerates minimal hitting sets of an explicit hypergraph. `efm` computes elementary modes
-of metabolic networks using exact integer arithmetic. This repository studies MMCS search on
-minimal reaction cut sets from two reconstructions of *E. coli*.
+`mcs` computes minimal cut sets of metabolic networks. It enumerates the elementary modes of a
+BiGG model in exact integer arithmetic, enumerates the minimal hitting sets of their supports with
+MMCS, checks solutions independently and measures where the search spends its nodes. This
+repository studies MMCS search on minimal reaction cut sets from two reconstructions of *E. coli*.
 
 ## Background
 
@@ -30,41 +31,40 @@ whose subtrees emit no solutions or repeat an earlier completed state. With stat
 The possible gain from isomorphic-state reuse is at most 7.1 percentage points beyond exact
 repeats, below the predeclared 1/6 threshold; the study stopped there. Dead subtrees contain most
 search nodes. Lineage A uses the METATOOL network of Haus, Klamt and Stephen on five substrates.
-Lineage B uses BiGG `e_coli_core`; `efm` reproduces its 100,274 elementary modes.
+Lineage B uses BiGG `e_coli_core`; `mcs modes` reproduces its 100,274 elementary modes.
 
 Every enumerated family used in these tables was checked against at least one independent
 enumerator (brute force, a Berge implementation, SHD or an LP cut oracle); see
-[EVIDENCE.md](EVIDENCE.md). On combined-growth, `mcs` without twins takes 1.81 s against 2.50 s for
-SHD on the same laptop.
+[EVIDENCE.md](EVIDENCE.md).
 
 ## Usage
 
 ```text
 cargo build --release
 cargo test --release
-python -m pip install -r requirements.txt   # adapters only: numpy, scipy
-python scripts/prepare.py                   # fetch and build every input into data/
+target/release/mcs prepare data     # download (curl, pinned SHA-256) and build every input
 ```
 
 ```text
-mcs inspect FILE
-mcs enumerate FILE [--alg mmcs|rs] [--ord idx|unhit] [--twins] [--k K] [--count]
-              [--out SOLS] [--summary JSON] [--census] [--time SECS] [--cap N] [--check]
+mcs enumerate FILE [--ord idx|unhit] [--twins] [--k K] [--count] [--census] [--check]
+              [--time SECS] [--out SOLS] [--summary JSON]
 mcs check FILE SOLS [--ref SOLS]
-efm CONE.json MODES.jsonl SUMMARY.json
+mcs census OUT SECS FILE...
+mcs modes MODEL MODES
+mcs prepare DIR [--skip-b]
 ```
 
 | Option | Effect |
 |---|---|
-| `--alg mmcs` | MMCS with the minimum-intersection branching edge and violator pruning (default) |
-| `--alg rs` | RS reverse search, without violator pruning; a correctness comparator |
-| `--ord unhit` | Candidates by increasing unhit degree (Hörmann and Schirneck 2026), reimplemented |
+| `--ord unhit` | Candidates by increasing unhit degree (Hörmann and Schirneck 2026), reimplemented; default `idx` |
 | `--twins` | Merge vertices with identical incidence; solutions are expanded over their classes |
 | `--k K` | Only minimal hitting sets of at most K vertices (`bounded_complete`) |
+| `--count` | Count solutions without writing them; exclusive with `--out` |
+| `--census` | Record dead and repeated subtrees (REPORT.md §2) |
 | `--check` | Verify each expanded solution against the raw rows: coverage and a private witness row per vertex |
-| `--census` | Record dead and repeated subtrees; MMCS only |
+| `--time SECS` | Stop the search after SECS (`resource_limited`) |
 
-Input is `mcs-hg/1` JSON, or a publisher file `{"sets": [[1, 2], ...], "labels": {"1": "mue"}}`:
+`enumerate` reads `mcs-hg/1` JSON, or a publisher file `{"sets": [[1, 2], ...], "labels": {"1": "mue"}}`:
 
 ```json
 {"schema": "mcs-hg/1",
@@ -74,56 +74,69 @@ Input is `mcs-hg/1` JSON, or a publisher file `{"sets": [[1, 2], ...], "labels":
  "meta": {}}
 ```
 
-Unknown ids, conflicting labels, malformed numbers and other schema versions are rejected. Edges
-are intersected with `eligible`. An empty edge means no solution exists; no edges means the empty
-set is the only solution. Duplicate and superset edges are removed with their source rows recorded.
+Unknown ids, conflicting labels, malformed numbers, unknown options and other schema versions are
+rejected. Edges are intersected with `eligible`. An empty edge means no solution exists; no edges
+means the empty set is the only solution. Duplicate and superset edges are removed.
 
 `--out` writes one JSON array of original ids per line. The summary reports `search_status`
 (`complete`, `bounded_complete`, `resource_limited`, `invalid_input`), `verification_status`
-(`not_run`, `passed`, `failed`), hashes of the input bytes and normalized form, settings,
-representative and expanded counts, nodes, stage times, the census and peak memory (Windows peak
-working set; not measured elsewhere). It is written last through a rename; a missing summary means
-an unfinished run.
+(`not_run`, `passed`, `failed`), hashes of the input bytes and of the normalized form, settings,
+representative and expanded counts, nodes, stage times and the census. It is written last through
+a rename; a missing summary means an unfinished run. Exit status is 1 when verification fails, 2 on
+a usage or I/O error and 3 on invalid input.
+
+`check` verifies a solutions file (a JSON array of arrays or JSON lines) and, with `--ref`, compares
+it with a reference family. `census` runs both candidate orders with and without twins on each file
+and writes `census.json` and `census.md`.
+
+`modes` reads a BiGG JSON model and writes one line per elementary mode,
+`{"columns": [[reaction, ±1], ...], "support": [...]}`. Its cone is the model's stoichiometry under
+the bound signs; reversible reactions are split, and the two-cycles this creates are dropped.
+Reactions that sign propagation proves blocked are removed first; the summary lists them as
+`pruned`, and as `blocked` the reactions that occur in no mode, which are exactly the blocked ones.
 
 ## Reproduction
 
 | Table or claim | Command |
 |---|---|
 | Tests | `cargo test --release` |
-| Inputs, lineage B modes | `python scripts/prepare.py` |
-| Mode check | `python adapters/verify_modes.py data/b/e_coli_core.json data/b/modes.jsonl 500 OUT.json` |
-| LP oracle, cuts of size ≤ 2 | `python adapters/lp_cuts.py data/b/e_coli_core.json data/b/ecc-growth.json 2 OUT.json` |
-| SHD cross-check and timing | `python bench/anchor.py target/release/mcs SHD OUT 15 3 data/a/*.json` |
-| SHD family, lineage B | `python bench/shd_family.py target/release/mcs SHD data/b/ecc-ethanol.json OUT 300` |
-| Census tables | `python bench/census.py target/release/mcs OUT 200 data/a/*-growth.json` |
+| Inputs, lineage B modes | `mcs prepare data` |
+| Counts | `mcs enumerate data/b/ecc-ethanol.json --count --ord unhit --twins` |
+| Ethanol cut sets, all checked | `mcs enumerate data/b/ecc-ethanol.json --ord unhit --twins --check --count` |
+| LP oracle, cuts of size ≤ 2 | `mcs enumerate data/b/ecc-growth.json --k 2 --out S` then `mcs check data/b/ecc-growth.json S --ref results/oracle/ecc-growth-k2.oracle.json` |
+| Berge oracle, acetate-growth | `mcs enumerate data/a/ecoli-acetate-growth.json --out S` then `mcs check data/a/ecoli-acetate-growth.json S --ref results/oracle/acetate-growth.oracle.json` |
+| Census tables | `mcs census OUT 240 data/a/ecoli-*-growth.json data/b/ecc-ethanol.json` |
 
-SHD (Uno) is not bundled; its source is in `MHSGenerationAlgorithms` under `containers/shd`, with
-its own academic-use notice. It builds with MSVC `/std:clatest` or a C compiler accepting `typeof`.
+The SHD comparison, the LP cut oracle and the floating-point mode check were external tools run
+once for v0.1.0. Their outputs are in `results/`; their drivers are in the `v0.1.0` tag. SHD (Uno)
+is in `MHSGenerationAlgorithms` under `containers/shd`, with its own academic-use notice.
 
 ## Project map
 
 | Path | Holds |
 |---|---|
-| `src/hg.rs` | Input contract, normalization, static twins, expansion |
-| `src/srch.rs` | MMCS, RS, census |
+| `src/bits.rs` | Fixed-length bitsets |
+| `src/hg.rs` | Normalization, static twins, expansion |
+| `src/srch.rs` | MMCS |
+| `src/cen.rs` | Census keys and counters |
 | `src/chk.rs` | Independent checker and family comparison |
-| `src/main.rs` | `mcs` command line |
-| `src/bin/efm.rs` | Elementary modes by nullspace double description in exact integers |
-| `adapters/` | BiGG model to cone, mode check, modes to hypergraph, LP cut oracle |
-| `bench/` | SHD comparison and timing, census tables |
-| `scripts/prepare.py` | Pinned downloads with SHA-256 checks and input construction |
-| `results/` | Frozen v0.1.0 measurements and oracle families |
+| `src/dd.rs` | Extreme rays of an integer cone by double description |
+| `src/net.rs` | Metabolic network to flux cone, modes and cut-set scenarios |
+| `src/bin/mcs/` | Command line: input formats, downloads, census tables |
+| `tests/` | Brute-force oracles for MMCS and for modes; the command line against `results/oracle/` |
+| `results/` | Frozen measurements and oracle families |
 
 ## Limits
 
 - Two reconstructions of one organism; no claim across organisms.
-- Superset-edge removal is quadratic in the worst case: 18 of 22 s on the 83,601-edge B growth input.
-- RS lacks violator pruning and is slow. Checkpoint and resume are not implemented.
-- Times are laptop measurements including process start.
+- Superset-edge removal is quadratic in the worst case: about 18 s on the 83,601-edge B growth input.
+- Sign propagation can miss blocked reactions; any it misses stay in the cone, which leaves the
+  modes unchanged and shows in the summary as `blocked` ≠ `pruned`.
+- Checkpoint and resume are not implemented. Times are laptop measurements.
 
 ## Licence and data
 
 MIT for the code in this repository. Input data are downloaded from their sources by
-`scripts/prepare.py` and not redistributed: the METATOOL mode files from
+`mcs prepare` and not redistributed: the METATOOL mode files from
 `VeraLiconaResearchGroup/MHSGenerationAlgorithms` and the model from BiGG. Cite the original
 authors when using them.
