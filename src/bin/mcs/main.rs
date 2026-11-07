@@ -2,7 +2,7 @@
 //
 //   mcs enumerate FILE [--ord idx|unhit] [--twins] [--k K] [--count] [--census] [--check]
 //                 [--time SECS] [--out SOLS] [--summary JSON]
-//   mcs check FILE SOLS [--ref SOLS]
+//   mcs check FILE SOLS [--ref SOLS] [--summary JSON]
 //   mcs census OUT SECS FILE...
 //   mcs modes MODEL MODES
 //   mcs prepare DIR [--skip-b]
@@ -12,6 +12,7 @@
 mod census;
 mod enumerate;
 mod inp;
+mod output;
 mod prepare;
 
 use sha2::{Digest, Sha256};

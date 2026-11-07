@@ -48,7 +48,7 @@ target/release/mcs prepare data     # download (curl, pinned SHA-256) and build 
 ```text
 mcs enumerate FILE [--ord idx|unhit] [--twins] [--k K] [--count] [--census] [--check]
               [--time SECS] [--out SOLS] [--summary JSON]
-mcs check FILE SOLS [--ref SOLS]
+mcs check FILE SOLS [--ref SOLS] [--summary JSON]
 mcs census OUT SECS FILE...
 mcs modes MODEL MODES
 mcs prepare DIR [--skip-b]
@@ -81,13 +81,26 @@ means the empty set is the only solution. Duplicate and superset edges are remov
 `--out` writes one JSON array of original ids per line. The summary reports `search_status`
 (`complete`, `bounded_complete`, `resource_limited`, `invalid_input`), `verification_status`
 (`not_run`, `passed`, `failed`), hashes of the input bytes and of the normalized form, settings,
-representative and expanded counts, nodes, stage times and the census. It is written last through
-a rename; a missing summary means an unfinished run. Exit status is 1 when verification fails, 2 on
-a usage or I/O error and 3 on invalid input.
+representative and expanded counts, nodes, stage times and the census. `count_status` is `exact`
+for the emitted count (a lower bound when search is resource-limited), or `overflow` when the
+expanded count exceeds u128; an overflowing count is null, never a wrapped integer. Census rows
+use the same count status.
+
+Solutions and summary files are write-once: choose new filenames for a rerun. Both are staged
+before publication, and the summary is published last with the solution path and SHA-256. A
+failed run cannot replace an accepted pair. If publication is interrupted after the solutions
+are published, they remain without an accepting summary; choose new filenames to retry. Existing
+result names are never overwritten, including by a concurrent writer. Publication requires a
+filesystem supporting hard links. Exit status is 1 when verification fails, 2 on a usage or I/O
+error and 3 on invalid input.
 
 `check` verifies a solutions file (a JSON array of arrays or JSON lines) and, with `--ref`, compares
-it with a reference family. `census` runs both candidate orders with and without twins on each file
-and writes `census.json` and `census.md`.
+it with a reference family. `--summary JSON` also requires the summary's input hash, solution hash
+and count to match the supplied files; its search status remains explicit, so a valid subfamily
+is not a proof of completeness. Summaries from earlier versions without a solution receipt cannot
+pass this optional check; checking their solutions directly remains supported.
+`census` runs both candidate orders with and without twins on each file
+and writes `census.json` and `census.md` once; use a fresh output directory for each run.
 
 `modes` reads a BiGG JSON model and writes one line per elementary mode,
 `{"columns": [[reaction, ±1], ...], "support": [...]}`. Its cone is the model's stoichiometry under

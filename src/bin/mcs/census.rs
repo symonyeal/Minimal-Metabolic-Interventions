@@ -9,10 +9,12 @@
 //   gap   wl − ex: the most isomorphism can add over exact memoization
 
 use crate::enumerate::{deadline, size, status};
+use crate::output::Pending;
 use crate::{Args, die, inp};
 use mcs::hg;
 use mcs::srch::{self, Cfg, Ord};
 use serde_json::{Value, json};
+use std::io::Write;
 use std::path::Path;
 use std::time::Instant;
 
@@ -37,7 +39,13 @@ pub fn census(a: &[String]) {
     let x = Args::new(a, 3, &[], &[]);
     let out = Path::new(&x.pos[0]);
     let secs: f64 = x.pos[1].parse().unwrap_or_else(|_| die("census: SECS must be a number"));
+    deadline(Instant::now(), secs);
     std::fs::create_dir_all(out).unwrap_or_else(|e| die(&format!("{}: {e}", out.display())));
+    let pending = |name| {
+        let p = out.join(name);
+        Pending::new(p.to_str().unwrap()).unwrap_or_else(|e| die(&format!("{}: {e}", p.display())))
+    };
+    let (mut data, mut table) = (pending("census.json"), pending("census.md"));
     let mut rows: Vec<Value> = vec![];
     for p in &x.pos[2..] {
         let (_, r) = inp::load(p);
@@ -48,12 +56,16 @@ pub fn census(a: &[String]) {
                 let t = hg::twins(&h, tw);
                 let t1 = Instant::now();
                 let cfg = Cfg { ord, k: None, census: true, dl: Some(deadline(t1, secs)) };
-                let mut nexp = 0u128;
-                let st = srch::run(t.h.n, &t.h.ev, &cfg, &mut |rep| nexp += size(&t.cls, rep));
+                let mut nexp = Some(0u128);
+                let st = srch::run(t.h.n, &t.h.ev, &cfg, &mut |rep| {
+                    nexp = nexp.and_then(|n| n.checked_add(size(&t.cls, rep)?));
+                });
                 let (c, n) = (&st.cen, st.nodes.max(1) as f64);
                 rows.push(json!({
                     "instance": stem, "ord": format!("{ord:?}").to_lowercase(), "twins": tw, "status": status(&st, None),
-                    "nodes": st.nodes, "solutions": nexp.to_string(), "dead": c.dead as f64 / n, "ex": c.ex_nodes as f64 / n,
+                    "nodes": st.nodes, "solutions": nexp.map(|n| n.to_string()),
+                    "count_status": if nexp.is_some() {"exact"} else {"overflow"},
+                    "dead": c.dead as f64 / n, "ex": c.ex_nodes as f64 / n,
                     "ex_dead_nodes": c.ex_dead, "wl": c.wl_nodes as f64 / n, "search_s": t1.elapsed().as_secs_f64(),
                 }));
                 println!("{}", rows.last().unwrap());
@@ -79,7 +91,11 @@ pub fn census(a: &[String]) {
             pct(f("wl") - f("ex")),
         ));
     }
-    let w = |f: &str, s: String| std::fs::write(out.join(f), s).unwrap_or_else(|e| die(&format!("{f}: {e}")));
-    w("census.json", serde_json::to_string_pretty(&rows).unwrap() + "\n");
-    w("census.md", md.join("\n") + "\n");
+    data.file
+        .write_all((serde_json::to_string_pretty(&rows).unwrap() + "\n").as_bytes())
+        .and_then(|_| table.file.write_all((md.join("\n") + "\n").as_bytes()))
+        .and_then(|_| data.file.sync_all())
+        .and_then(|_| table.file.sync_all())
+        .unwrap_or_else(|e| die(&format!("census: {e}")));
+    table.publish().and_then(|_| data.publish()).unwrap_or_else(|e| die(&format!("census: {e}")));
 }
