@@ -187,8 +187,10 @@ pub fn check(a: &[String]) {
         .take(10)
         .map(|(c, e)| json!({"solution": c.iter().map(|&v| &r.ids[v]).collect::<Vec<_>>(), "error": format!("{e:?}")}))
         .collect();
-    let mut out = json!({"solutions": sols.len(), "failed": fails.len(), "first_failures": first});
-    let mut ok = fails.is_empty();
+    let duplicates = sols.len() - sols.iter().collect::<HashSet<_>>().len();
+    let mut out =
+        json!({"solutions": sols.len(), "failed": fails.len(), "duplicates": duplicates, "first_failures": first});
+    let mut ok = fails.is_empty() && duplicates == 0;
     if let Some(path) = x.get("--summary") {
         let read = |p| std::fs::read(p).unwrap_or_else(|e| die(&format!("{p}: {e}")));
         let summary: Value = serde_json::from_slice(&read(path)).unwrap_or_else(|e| die(&format!("{path}: {e}")));

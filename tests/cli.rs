@@ -196,3 +196,12 @@ fn exit_status() {
     let (code, _) = mcs(&["enumerate", "results/oracle/fano.json", "--k", "2", "--count"]);
     assert_eq!(code, 0);
 }
+
+#[test]
+fn check_rejects_duplicate_solutions_without_reference() {
+    let p = pairs(1, false);
+    let s = tmp("duplicates.jsonl");
+    std::fs::write(&s, "[\"0\"]\n[\"0\"]\n").unwrap();
+    let (code, text) = mcs(&["check", p.to_str().unwrap(), s.to_str().unwrap()]);
+    assert_eq!(code, 1, "{text}");
+}

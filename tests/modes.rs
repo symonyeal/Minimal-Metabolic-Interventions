@@ -110,3 +110,45 @@ fn network_cone_and_modes() {
     let (es, vs, el) = net::scenario(&net, &m.sup, Some(3), Pol::Core);
     assert_eq!((es.len(), vs, el), (1, vec![0, 1, 2, 3], vec![1, 2]));
 }
+
+#[test]
+fn cone_rejects_scaling_overflow() {
+    let net = Net {
+        mets: vec!["a".into(), "b".into()],
+        rx: vec![rx("R", 0.0, 1.0, &[(0, 1e20), (1, 1e-20)]), rx("S", 0.0, 1.0, &[(0, -1.0), (1, -1.0)])],
+    };
+    assert!(net::cone(&net).is_err(), "scaling 1e20 by 1e20 must not wrap");
+}
+
+#[test]
+fn sign_propagation_does_not_hide_unsupported_precision() {
+    let net =
+        Net { mets: vec!["a".into()], rx: vec![rx("R", 0.0, 1.0, &[(0, 1e-200)]), rx("S", 0.0, 1.0, &[(0, -1e-200)])] };
+    // The opposite coefficients admit a flux cycle. Multiplying them underflows to zero and
+    // incorrectly prunes both reactions, bypassing the exact-decimal precision check.
+    assert!(net::cone(&net).is_err());
+}
+
+#[test]
+fn rays_reject_invalid_matrix_and_signed_overflow() {
+    assert!(dd::rays(&[vec![1]], 2).is_err());
+    assert!(dd::rays(&[vec![1, -1, 7]], 2).is_err());
+    assert!(dd::rays(&[vec![i128::MIN, 1]], 2).is_err());
+    // Elimination would produce MIN, whose absolute value cannot be represented.
+    assert!(dd::rays(&[vec![2, 0], vec![1, -(1i128 << 126)]], 2).is_err());
+}
+
+#[test]
+fn network_rejects_ambiguous_ids_bounds_and_stoichiometry() {
+    for net in [
+        Net { mets: vec!["a".into(), "a".into()], rx: vec![] },
+        Net { mets: vec![], rx: vec![rx("R", 0.0, 1.0, &[]), rx("R", 0.0, 1.0, &[])] },
+        Net { mets: vec![], rx: vec![rx("R", 1.0, -1.0, &[])] },
+        Net { mets: vec![], rx: vec![rx("R", f64::NAN, 1.0, &[])] },
+        Net { mets: vec!["a".into()], rx: vec![rx("R", 0.0, 1.0, &[(1, 1.0)])] },
+        Net { mets: vec!["a".into()], rx: vec![rx("R", 0.0, 1.0, &[(0, 1.0), (0, -1.0)])] },
+        Net { mets: vec!["a".into()], rx: vec![rx("R", 0.0, 1.0, &[(0, f64::INFINITY)])] },
+    ] {
+        assert!(net::cone(&net).is_err());
+    }
+}

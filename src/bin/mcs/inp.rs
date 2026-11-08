@@ -147,6 +147,9 @@ pub fn bigg(b: &[u8]) -> Result<Net, String> {
         .map(|x| x["id"].as_str().map(str::to_owned).ok_or("metabolite without id"))
         .collect::<Result<_, _>>()?;
     let mi: HashMap<&str, usize> = mets.iter().enumerate().map(|(i, k)| (k.as_str(), i)).collect();
+    if mi.len() != mets.len() || mets.iter().any(String::is_empty) {
+        return Err("metabolite ids must be nonempty and unique".into());
+    }
     let mut rx = vec![];
     for r in arr("reactions")? {
         let id = r["id"].as_str().ok_or("reaction without id")?.to_owned();
@@ -168,6 +171,11 @@ pub fn bigg(b: &[u8]) -> Result<Net, String> {
 mod tests {
     use super::parse;
     use mcs::hg;
+
+    #[test]
+    fn model_identity_contract() {
+        assert!(super::bigg(br#"{"metabolites":[{"id":"a"},{"id":"a"}],"reactions":[]}"#).is_err());
+    }
 
     #[test]
     fn input_contract() {

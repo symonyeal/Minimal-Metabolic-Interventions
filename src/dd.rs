@@ -126,6 +126,13 @@ pub fn rays(a: &[Vec<i128>], q: usize) -> Result<Dd, String> {
     if q > 256 {
         return Err(format!("{q} columns; at most 256 are supported"));
     }
+    if a.iter().any(|r| r.len() != q) {
+        return Err("matrix rows must have exactly q columns".into());
+    }
+    // Normalization and kernel construction require representable magnitudes and negations.
+    if a.iter().flatten().any(|&x| x == i128::MIN) {
+        return Err(OVF.into());
+    }
     let mut m = a.to_vec();
 
     // Reduced row echelon form, fraction-free with row gcd normalization.
@@ -139,7 +146,11 @@ pub fn rays(a: &[Vec<i128>], q: usize) -> Result<Dd, String> {
             if r != r0 && row[c] != 0 {
                 let (x, y) = (pr[c], row[c]);
                 for (u, &w) in row.iter_mut().zip(&pr) {
-                    *u = u.checked_mul(x).and_then(|u| w.checked_mul(y).and_then(|w| u.checked_sub(w))).ok_or(OVF)?;
+                    *u = u
+                        .checked_mul(x)
+                        .and_then(|u| w.checked_mul(y).and_then(|w| u.checked_sub(w)))
+                        .filter(|&u| u != i128::MIN)
+                        .ok_or(OVF)?;
                 }
                 norm(row);
             }
@@ -158,8 +169,10 @@ pub fn rays(a: &[Vec<i128>], q: usize) -> Result<Dd, String> {
     })?;
     let mut rs: Vec<Ray> = vec![];
     for &f in &free {
-        let mut v =
-            piv.iter().map(|&(r, c)| (-m[r][f]).checked_mul(l / m[r][c]).ok_or(OVF)).collect::<Result<Vec<_>, _>>()?;
+        let mut v = piv
+            .iter()
+            .map(|&(r, c)| (-m[r][f]).checked_mul(l / m[r][c]).filter(|&u| u != i128::MIN).ok_or(OVF))
+            .collect::<Result<Vec<_>, _>>()?;
         v.push(l);
         norm(&mut v);
         v.pop();
@@ -195,7 +208,10 @@ pub fn rays(a: &[Vec<i128>], q: usize) -> Result<Dd, String> {
                     rp.v.iter()
                         .zip(&rn.v)
                         .map(|(&u, &w)| {
-                            u.checked_mul(x).and_then(|u| w.checked_mul(y).and_then(|w| u.checked_add(w))).ok_or(OVF)
+                            u.checked_mul(x)
+                                .and_then(|u| w.checked_mul(y).and_then(|w| u.checked_add(w)))
+                                .filter(|&u| u != i128::MIN)
+                                .ok_or(OVF)
                         })
                         .collect::<Result<Vec<_>, _>>()?;
                 norm(&mut v);

@@ -121,3 +121,18 @@ exact repeats of dead states. The B growth census did not finish within 240 s an
 - The census computes full restricted keys at every node: about 100 times the node cost of plain
   search. It is a measurement, not a usable cache.
 - Checkpoint and resume are not implemented.
+
+## Boundary review, 2026-11-07
+
+The review at `277e046` reproduced three failures with bounded regression tests: a reaction
+containing coefficients 1e20 and 1e-20 silently wrapped during integer scaling; a short matrix row
+panicked in double description; and `check` accepted a duplicated valid solution without `--ref`.
+An optimized standalone probe of that revision also admitted extra matrix columns and i128::MIN,
+including an elimination intermediate whose magnitude cannot be represented.
+
+Scaling now checks products, sign propagation compares signs without floating-point products,
+and the cone boundary rejects ambiguous ids, invalid bounds and malformed stoichiometry. Double
+description checks matrix dimensions and rejects unrepresentable magnitudes at admission and
+after arithmetic. `check` rejects duplicate solutions on every path. Tests include coefficients
+whose sign product underflows: they must reach the unsupported-precision error rather than be
+silently classified as blocked. Existing frozen measurements and oracle files were preserved.

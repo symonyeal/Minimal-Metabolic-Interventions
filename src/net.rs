@@ -20,6 +20,7 @@
 // feasible flux decomposes into such rays, so the exactly blocked reactions are those in no mode.
 
 use crate::dd::gcd;
+use std::collections::HashSet;
 
 pub struct Rxn {
     pub id: String,
@@ -53,6 +54,23 @@ fn dec(x: f64) -> Result<(i128, i128), String> {
 }
 
 pub fn cone(net: &Net) -> Result<Cone, String> {
+    let mut ids = HashSet::new();
+    if net.mets.iter().any(|id| id.is_empty() || !ids.insert(id)) {
+        return Err("metabolite ids must be nonempty and unique".into());
+    }
+    let mut ids = HashSet::new();
+    for r in &net.rx {
+        if r.id.is_empty() || !ids.insert(&r.id) {
+            return Err("reaction ids must be nonempty and unique".into());
+        }
+        if !r.lo.is_finite() || !r.hi.is_finite() || r.lo > r.hi {
+            return Err(format!("{}: expected finite lower_bound <= upper_bound", r.id));
+        }
+        let mut seen = HashSet::new();
+        if r.st.iter().any(|&(i, c)| i >= net.mets.len() || !c.is_finite() || !seen.insert(i)) {
+            return Err(format!("{}: stoichiometry needs unique known metabolites and finite coefficients", r.id));
+        }
+    }
     let mut by: Vec<Vec<(usize, f64)>> = vec![vec![]; net.mets.len()];
     for (j, r) in net.rx.iter().enumerate() {
         for &(i, c) in r.st.iter().filter(|x| x.1 != 0.0) {
@@ -68,7 +86,9 @@ pub fn cone(net: &Net) -> Result<Cone, String> {
             for &(j, c) in inc {
                 for (k, s) in [(0, c), (1, -c)] {
                     let opp = |&(o, co): &(usize, f64)| {
-                        o != j && ((live[o][0] && co * s < 0.0) || (live[o][1] && co * s > 0.0))
+                        o != j
+                            && ((live[o][0] && co.is_sign_positive() != s.is_sign_positive())
+                                || (live[o][1] && co.is_sign_positive() == s.is_sign_positive()))
                     };
                     if live[j][k] && !inc.iter().any(opp) {
                         live[j][k] = false;
@@ -97,7 +117,11 @@ pub fn cone(net: &Net) -> Result<Cone, String> {
         let pq = st.iter().map(|&(_, c)| dec(c)).collect::<Result<Vec<_>, _>>()?;
         let l = pq.iter().try_fold(1i128, |l, &(_, q)| (l / gcd(l, q)).checked_mul(q)).ok_or("lcm exceeds i128")?;
         for (&(i, _), &(p, q)) in st.iter().zip(&pq) {
-            a[i][k] = (p * (l / q)) * d as i128;
+            a[i][k] = p
+                .checked_mul(l / q)
+                .and_then(|p| p.checked_mul(d as i128))
+                .filter(|&p| p != i128::MIN)
+                .ok_or("scaled coefficient exceeds i128")?;
             used[i] = true;
         }
     }

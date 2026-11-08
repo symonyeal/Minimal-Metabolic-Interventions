@@ -95,7 +95,8 @@ filesystem supporting hard links. Exit status is 1 when verification fails, 2 on
 error and 3 on invalid input.
 
 `check` verifies a solutions file (a JSON array of arrays or JSON lines) and, with `--ref`, compares
-it with a reference family. `--summary JSON` also requires the summary's input hash, solution hash
+it with a reference family. Repeated solutions fail verification, including without a reference.
+`--summary JSON` also requires the summary's input hash, solution hash
 and count to match the supplied files; its search status remains explicit, so a valid subfamily
 is not a proof of completeness. Summaries from earlier versions without a solution receipt cannot
 pass this optional check; checking their solutions directly remains supported.
@@ -107,6 +108,8 @@ and writes `census.json` and `census.md` once; use a fresh output directory for 
 the bound signs; reversible reactions are split, and the two-cycles this creates are dropped.
 Reactions that sign propagation proves blocked are removed first; the summary lists them as
 `pruned`, and as `blocked` the reactions that occur in no mode, which are exactly the blocked ones.
+Models require unique nonempty metabolite and reaction ids, finite ordered bounds, and finite
+stoichiometry. Unsupported decimal precision or integer scaling overflow fails before mode output.
 
 ## Reproduction
 
