@@ -40,6 +40,7 @@ pub fn census(a: &[String]) {
     let out = Path::new(&x.pos[0]);
     let secs: f64 = x.pos[1].parse().unwrap_or_else(|_| die("census: SECS must be a number"));
     deadline(Instant::now(), secs);
+    let inputs: Vec<_> = x.pos[2..].iter().map(|p| (p, inp::load(p).1)).collect(); // before staging files
     std::fs::create_dir_all(out).unwrap_or_else(|e| die(&format!("{}: {e}", out.display())));
     let pending = |name| {
         let p = out.join(name);
@@ -47,8 +48,7 @@ pub fn census(a: &[String]) {
     };
     let (mut data, mut table) = (pending("census.json"), pending("census.md"));
     let mut rows: Vec<Value> = vec![];
-    for p in &x.pos[2..] {
-        let (_, r) = inp::load(p);
+    for (p, r) in &inputs {
         let (h, _) = hg::norm(r.ids.len(), &r.rows);
         let stem = Path::new(p).file_stem().unwrap().to_string_lossy();
         for ord in [Ord::Idx, Ord::Unhit] {

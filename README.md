@@ -36,6 +36,9 @@ Lineage B uses BiGG `e_coli_core`; `mcs modes` reproduces its 100,274 elementary
 Every enumerated family used in these tables was checked against at least one independent
 enumerator (brute force, a Berge implementation, SHD or an LP cut oracle); see
 [EVIDENCE.md](EVIDENCE.md).
+The published counts for the B growth (889,389) and all-modes (3,545,843) families are not
+independently checked for completeness: only the cut sets of size at most 2 of growth were
+compared with the LP oracle, and SHD did not finish on growth.
 
 ## Usage
 
@@ -97,8 +100,8 @@ error and 3 on invalid input.
 `check` verifies a solutions file (a JSON array of arrays or JSON lines) and, with `--ref`, compares
 it with a reference family. Repeated solutions fail verification, including without a reference.
 `--summary JSON` also requires the summary's input hash, solution hash
-and count to match the supplied files; its search status remains explicit, so a valid subfamily
-is not a proof of completeness. Summaries from earlier versions without a solution receipt cannot
+and count to match the supplied files and the search to be `complete` or `bounded_complete`; a
+valid subfamily is not a proof of completeness. Summaries from earlier versions without a solution receipt cannot
 pass this optional check; checking their solutions directly remains supported.
 `census` runs both candidate orders with and without twins on each file
 and writes `census.json` and `census.md` once; use a fresh output directory for each run.

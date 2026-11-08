@@ -82,10 +82,15 @@ pub fn enumerate(a: &[String]) {
     let tw = hg::twins(&h, tws);
     let t1 = Instant::now();
     let cfg = Cfg { ord, k, census: cen, dl: secs.map(|s| deadline(t1, s)) };
-    let pending = |p| Pending::new(p).unwrap_or_else(|e| die(&format!("{p}: {e}")));
-    let mut output = x.get("--out").map(pending);
-    let mut summary = x.get("--summary").map(pending);
+    let open = |p| Pending::new(p).map_err(|e| format!("{p}: {e}"));
+    let (output, summary) = (x.get("--out").map(open).transpose(), x.get("--summary").map(open).transpose());
+    // die() exits without running Drop, so a failure first releases whatever was staged.
+    let (mut output, mut summary) = match (output, summary) {
+        (Ok(o), Ok(s)) => (o, s),
+        (o, s) => die(&o.err().or(s.err()).unwrap()),
+    };
     if output.as_ref().zip(summary.as_ref()).is_some_and(|(a, b)| a.dest == b.dest) {
+        drop((output, summary));
         die("solutions and summary need different filenames");
     }
     let mut w = output.as_mut().map(|o| BufWriter::new(&mut o.file));
@@ -200,7 +205,7 @@ pub fn check(a: &[String]) {
                 == Some(sols.len() as u128)
             && summary["count_status"] == "exact"
             && summary["verification_status"] != "failed"
-            && matches!(summary["search_status"].as_str(), Some("complete" | "bounded_complete" | "resource_limited"));
+            && matches!(summary["search_status"].as_str(), Some("complete" | "bounded_complete"));
         ok &= matched;
         out["summary"] = json!({"path": path, "matches": matched, "search_status": summary["search_status"]});
     }

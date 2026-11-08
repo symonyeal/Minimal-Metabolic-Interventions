@@ -108,6 +108,30 @@ fn summary_failure_does_not_publish_solutions() {
         2
     );
     assert!(!out.exists());
+    assert_eq!(std::fs::read_dir(out.parent().unwrap()).unwrap().count(), 0, "no staged files remain");
+}
+
+#[test]
+fn invalid_census_input_leaves_no_staged_files() {
+    let bad = tmp("bad.json");
+    std::fs::write(&bad, r#"{"x":1}"#).unwrap();
+    let dir = tmp("census");
+    assert_eq!(mcs(&["census", dir.to_str().unwrap(), "1", bad.to_str().unwrap()]).0, 3);
+    assert!(!dir.exists() || std::fs::read_dir(&dir).unwrap().count() == 0);
+}
+
+#[test]
+fn check_rejects_a_truncated_enumeration_summary() {
+    let p = pairs(1, false);
+    let (out, summary) = (tmp("solutions.jsonl"), tmp("summary.json"));
+    let a = ["enumerate", p.to_str().unwrap(), "--time", "0", "--out", out.to_str().unwrap()];
+    let mut a = a.to_vec();
+    a.extend(["--summary", summary.to_str().unwrap()]);
+    assert_eq!(mcs(&a).0, 0);
+    assert_eq!(read(&summary)["search_status"], "resource_limited");
+    let (code, text) =
+        mcs(&["check", p.to_str().unwrap(), out.to_str().unwrap(), "--summary", summary.to_str().unwrap()]);
+    assert_eq!(code, 1, "{text}");
 }
 
 #[test]
