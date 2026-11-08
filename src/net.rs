@@ -160,9 +160,9 @@ pub fn modes(net: &Net, c: &Cone, rays: Vec<Vec<usize>>) -> Modes {
 pub enum Pol {
     /// Every reaction but the target.
     AllButTarget,
-    /// No exchange, demand, sink, biomass or ATP maintenance reaction, and no reaction whose
-    /// bounds exclude zero.
-    Core,
+    /// No reaction whose id starts with one of the prefixes (the model's boundary and maintenance
+    /// reactions, chosen by the caller), and no reaction whose bounds exclude zero.
+    Core(&'static [&'static str]),
 }
 
 /// Cut-set hypergraph: edges are the supports of the modes using t (every mode when t is None);
@@ -181,12 +181,7 @@ pub fn scenario<'a>(
         let r = &net.rx[j];
         match pol {
             Pol::AllButTarget => Some(j) != t,
-            Pol::Core => {
-                !["EX_", "DM_", "SK_", "BIOMASS"].iter().any(|p| r.id.starts_with(p))
-                    && r.id != "ATPM"
-                    && r.lo <= 0.0
-                    && 0.0 <= r.hi
-            }
+            Pol::Core(skip) => !skip.iter().any(|p| r.id.starts_with(p)) && r.lo <= 0.0 && 0.0 <= r.hi,
         }
     };
     let el = vs.iter().copied().filter(ok).collect();

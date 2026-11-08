@@ -107,7 +107,7 @@ fn network_cone_and_modes() {
     let d = dd::rays(&c.a, c.cols.len()).unwrap();
     let m = net::modes(&net, &c, d.rays);
     assert_eq!((m.sup.clone(), m.two_cycles, m.blocked.clone()), (vec![vec![0, 1, 2, 3]], 1, vec![4]));
-    let (es, vs, el) = net::scenario(&net, &m.sup, Some(3), Pol::Core);
+    let (es, vs, el) = net::scenario(&net, &m.sup, Some(3), Pol::Core(&["EX_", "ATPM"]));
     assert_eq!((es.len(), vs, el), (1, vec![0, 1, 2, 3], vec![1, 2]));
 }
 

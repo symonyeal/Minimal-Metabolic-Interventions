@@ -27,9 +27,11 @@ const A: [(&str, &str); 5] = [
 ];
 const B_URL: &str = "https://bigg.ucsd.edu/static/models/e_coli_core.json";
 const B_SHA: &str = "7bedec10576cfe935b19218dc881f3fb14f890a1871448fc19a9b4ee15b448d8";
+/// BiGG id prefixes of exchange, demand, sink, biomass and ATP maintenance reactions.
+const BOUNDARY: &[&str] = &["EX_", "DM_", "SK_", "BIOMASS", "ATPM"];
 const B_SCEN: [(Option<&str>, Pol, &str); 3] = [
     (Some("BIOMASS_Ecoli_core_w_GAM"), Pol::AllButTarget, "growth"),
-    (Some("EX_etoh_e"), Pol::Core, "ethanol"),
+    (Some("EX_etoh_e"), Pol::Core(BOUNDARY), "ethanol"),
     (None, Pol::AllButTarget, "all"),
 ];
 
@@ -54,10 +56,12 @@ fn get(u: &str, sha: &str, out: &Path) {
     let ok =
         Command::new("curl").args(["-fsSL", "--retry", "3", "-o"]).arg(&tmp).arg(u).status().is_ok_and(|s| s.success());
     if !ok {
+        let _ = std::fs::remove_file(&tmp);
         die(&format!("{u}: download failed (curl)"));
     }
     let h = hex(&read(&tmp));
     if h != sha {
+        let _ = std::fs::remove_file(&tmp);
         die(&format!("{u}: sha256 {h}, expected {sha}"));
     }
     std::fs::rename(&tmp, out).unwrap_or_else(|e| die(&format!("{}: {e}", out.display())));
@@ -88,8 +92,8 @@ fn efm(model: &Path, out: &Path) -> (Net, Vec<Vec<usize>>, Value) {
         "reactions": net.rx.len(), "columns": cone.cols.len(), "rank": dd.rank, "free": dd.free,
         "modes": m.sup.len(), "two_cycles": m.two_cycles, "peak_rays": dd.peak,
         "pruned": rids(&net, &cone.pruned), "blocked": rids(&net, &m.blocked),
-        "elapsed_s": t0.elapsed().as_secs_f64(),
     });
+    eprintln!("modes: {} in {:.1} s", m.sup.len(), t0.elapsed().as_secs_f64());
     (net, m.sup, sm)
 }
 
@@ -158,7 +162,7 @@ pub fn prepare(a: &[String]) {
             "edges": edges,
             "eligible": el.iter().map(|&j| id(j)).collect::<Vec<_>>(),
             "meta": {"model": name(&mdl), "model_sha256": sm["model_sha256"], "modes": name(&mo), "modes_sha256": sm["modes_sha256"],
-                     "target": t.unwrap_or("all"), "policy": if pol == Pol::Core { "core" } else { "all-but-target" }, "target_modes": es.len(), "all_modes": sup.len()},
+                     "target": t.unwrap_or("all"), "policy": if matches!(pol, Pol::Core(_)) { "core" } else { "all-but-target" }, "target_modes": es.len(), "all_modes": sup.len()},
         });
         write(&db.join(format!("ecc-{nm}.json")), doc.to_string().as_bytes());
         println!("{nm}: {} edges, {} vertices, {} eligible", es.len(), vs.len(), el.len());

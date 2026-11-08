@@ -151,6 +151,16 @@ is in `MHSGenerationAlgorithms` under `containers/shd`, with its own academic-us
 - Superset-edge removal is quadratic in the worst case: about 18 s on the 83,601-edge B growth input.
 - Sign propagation can miss blocked reactions; any it misses stay in the cone, which leaves the
   modes unchanged and shows in the summary as `blocked` ≠ `pruned`.
+- The flux cone keeps signs and ignores bound magnitudes, including forced flux. In `e_coli_core`
+  `ATPM` has lower bound 8.39, so modes that do not use it are not steady states of the bounded
+  model; the `growth` and `all` families treat it as an ordinary eligible reaction, and the
+  `ethanol` family excludes it by id prefix. "Blocks growth" means blocks the sign cone.
+- Coefficients are read as the shortest decimal of the parsed number, so the arithmetic is exact
+  over that decimal, not over the model text beyond 17 significant digits.
+- The double-description step supports at most 256 columns (reactions plus one per reversible
+  reaction); a larger network stops with an error naming the count.
+- `--check` verifies that the solutions cover every edge and are minimal, not that the family is
+  complete.
 - Checkpoint and resume are not implemented. Times are laptop measurements.
 
 ## Licence and data
