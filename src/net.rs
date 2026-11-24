@@ -53,7 +53,7 @@ fn dec(x: f64) -> Result<(i128, i128), String> {
     Ok((p / g, q / g))
 }
 
-pub fn cone(net: &Net) -> Result<Cone, String> {
+fn validate_net(net: &Net) -> Result<(), String> {
     let mut ids = HashSet::new();
     if net.mets.iter().any(|id| id.is_empty() || !ids.insert(id)) {
         return Err("metabolite ids must be nonempty and unique".into());
@@ -71,6 +71,10 @@ pub fn cone(net: &Net) -> Result<Cone, String> {
             return Err(format!("{}: stoichiometry needs unique known metabolites and finite coefficients", r.id));
         }
     }
+    Ok(())
+}
+
+fn feasible(net: &Net) -> Vec<[bool; 2]> {
     let mut by: Vec<Vec<(usize, f64)>> = vec![vec![]; net.mets.len()];
     for (j, r) in net.rx.iter().enumerate() {
         for &(i, c) in r.st.iter().filter(|x| x.1 != 0.0) {
@@ -98,6 +102,12 @@ pub fn cone(net: &Net) -> Result<Cone, String> {
             }
         }
     }
+    live
+}
+
+pub fn cone(net: &Net) -> Result<Cone, String> {
+    validate_net(net)?;
+    let live = feasible(net);
     let pruned: Vec<usize> = (0..net.rx.len()).filter(|&j| live[j] == [false, false]).collect();
     let mut cols = vec![];
     for (j, r) in net.rx.iter().enumerate() {

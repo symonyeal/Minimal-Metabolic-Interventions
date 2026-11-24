@@ -122,19 +122,7 @@ pub struct Dd {
     pub peak: usize,
 }
 
-pub fn rays(a: &[Vec<i128>], q: usize) -> Result<Dd, String> {
-    if q > 256 {
-        return Err(format!("{q} columns; at most 256 are supported"));
-    }
-    if a.iter().any(|r| r.len() != q) {
-        return Err("matrix rows must have exactly q columns".into());
-    }
-    // Normalization and kernel construction require representable magnitudes and negations.
-    if a.iter().flatten().any(|&x| x == i128::MIN) {
-        return Err(OVF.into());
-    }
-    let mut m = a.to_vec();
-
+fn echelon(m: &mut [Vec<i128>], q: usize) -> Result<Vec<(usize, usize)>, String> {
     // Reduced row echelon form, fraction-free with row gcd normalization.
     let mut piv: Vec<(usize, usize)> = vec![]; // (row, column)
     for c in 0..q {
@@ -157,6 +145,23 @@ pub fn rays(a: &[Vec<i128>], q: usize) -> Result<Dd, String> {
         }
         piv.push((r0, c));
     }
+    Ok(piv)
+}
+
+pub fn rays(a: &[Vec<i128>], q: usize) -> Result<Dd, String> {
+    if q > 256 {
+        return Err(format!("{q} columns; at most 256 are supported"));
+    }
+    if a.iter().any(|r| r.len() != q) {
+        return Err("matrix rows must have exactly q columns".into());
+    }
+    // Normalization and kernel construction require representable magnitudes and negations.
+    if a.iter().flatten().any(|&x| x == i128::MIN) {
+        return Err(OVF.into());
+    }
+    let mut m = a.to_vec();
+
+    let piv = echelon(&mut m, q)?;
     let free: Vec<usize> = (0..q).filter(|c| !piv.iter().any(|&(_, pc)| pc == *c)).collect();
     let d = free.len();
     let mut rem: Vec<usize> = piv.iter().map(|&(_, c)| c).collect();

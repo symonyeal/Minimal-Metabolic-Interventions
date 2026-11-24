@@ -26,6 +26,51 @@ fn strs(v: &Value, what: &str) -> Result<Vec<String>, String> {
         .collect()
 }
 
+fn vertices(v: &Value) -> Result<(Vec<String>, HashMap<String, usize>), String> {
+    let mut ids: Vec<String> = vec![];
+    let mut lab: Vec<Option<&str>> = vec![];
+    let mut ix: HashMap<String, usize> = HashMap::new();
+    for x in v["vertices"].as_array().ok_or("vertices: expected an array")? {
+        let id = x["id"].as_str().ok_or("vertex without string id")?.to_owned();
+        let l = match x.get("label") {
+            None | Some(Value::Null) => None,
+            Some(l) => Some(l.as_str().ok_or("label: expected a string")?),
+        };
+        match ix.get(&id) {
+            Some(&i) if lab[i] != l => return Err(format!("conflicting labels for vertex {id}")),
+            Some(_) => {}
+            None => {
+                ix.insert(id.clone(), ids.len());
+                ids.push(id);
+                lab.push(l);
+            }
+        }
+    }
+    Ok((ids, ix))
+}
+
+fn publisher(s: &Value, v: &Value) -> Result<(Vec<String>, Vec<Vec<usize>>), String> {
+    // Publisher format: integer ids, optional {"id": label} map.
+    let mut rows: Vec<Vec<u64>> = vec![];
+    for e in s.as_array().ok_or("sets: expected an array")? {
+        let r = e.as_array().ok_or("set: expected an array")?;
+        rows.push(
+            r.iter().map(|x| x.as_u64().ok_or(format!("malformed vertex number {x}"))).collect::<Result<_, _>>()?,
+        );
+    }
+    let mut ls: Vec<u64> = vec![];
+    if let Some(l) = v.get("labels") {
+        for (k, x) in l.as_object().ok_or("labels: expected an object")? {
+            ls.push(k.parse().map_err(|_| format!("malformed label key {k}"))?);
+            x.as_str().ok_or("label: expected a string")?;
+        }
+    }
+    let all: BTreeSet<u64> = rows.iter().flatten().copied().chain(ls).collect();
+    let ix: HashMap<u64, usize> = all.iter().enumerate().map(|(i, &x)| (x, i)).collect();
+    let er = rows.iter().map(|r| r.iter().map(|x| ix[x]).collect()).collect();
+    Ok((all.iter().map(u64::to_string).collect(), er))
+}
+
 /// Labels are validated (a repeated vertex must repeat its label) but not kept.
 pub fn parse(b: &[u8]) -> Result<Raw, String> {
     let v: Value = serde_json::from_slice(b).map_err(|e| format!("malformed JSON: {e}"))?;
@@ -33,25 +78,7 @@ pub fn parse(b: &[u8]) -> Result<Raw, String> {
         if s.as_str() != Some(SCHEMA) {
             return Err(format!("unsupported schema {s}; expected {SCHEMA}"));
         }
-        let mut ids: Vec<String> = vec![];
-        let mut lab: Vec<Option<&str>> = vec![];
-        let mut ix: HashMap<String, usize> = HashMap::new();
-        for x in v["vertices"].as_array().ok_or("vertices: expected an array")? {
-            let id = x["id"].as_str().ok_or("vertex without string id")?.to_owned();
-            let l = match x.get("label") {
-                None | Some(Value::Null) => None,
-                Some(l) => Some(l.as_str().ok_or("label: expected a string")?),
-            };
-            match ix.get(&id) {
-                Some(&i) if lab[i] != l => return Err(format!("conflicting labels for vertex {id}")),
-                Some(_) => {}
-                None => {
-                    ix.insert(id.clone(), ids.len());
-                    ids.push(id);
-                    lab.push(l);
-                }
-            }
-        }
+        let (ids, ix) = vertices(&v)?;
         let look = |s: &String| ix.get(s).copied().ok_or(format!("unknown vertex id {s}"));
         let mut er = vec![];
         for e in v["edges"].as_array().ok_or("edges: expected an array")? {
@@ -63,25 +90,8 @@ pub fn parse(b: &[u8]) -> Result<Raw, String> {
         };
         (ids, er, el, SCHEMA)
     } else if let Some(s) = v.get("sets") {
-        // Publisher format: integer ids, optional {"id": label} map.
-        let mut rows: Vec<Vec<u64>> = vec![];
-        for e in s.as_array().ok_or("sets: expected an array")? {
-            let r = e.as_array().ok_or("set: expected an array")?;
-            rows.push(
-                r.iter().map(|x| x.as_u64().ok_or(format!("malformed vertex number {x}"))).collect::<Result<_, _>>()?,
-            );
-        }
-        let mut ls: Vec<u64> = vec![];
-        if let Some(l) = v.get("labels") {
-            for (k, x) in l.as_object().ok_or("labels: expected an object")? {
-                ls.push(k.parse().map_err(|_| format!("malformed label key {k}"))?);
-                x.as_str().ok_or("label: expected a string")?;
-            }
-        }
-        let all: BTreeSet<u64> = rows.iter().flatten().copied().chain(ls).collect();
-        let ix: HashMap<u64, usize> = all.iter().enumerate().map(|(i, &x)| (x, i)).collect();
-        let er = rows.iter().map(|r| r.iter().map(|x| ix[x]).collect()).collect();
-        (all.iter().map(u64::to_string).collect(), er, None, "sets")
+        let (ids, er) = publisher(s, &v)?;
+        (ids, er, None, "sets")
     } else {
         return Err("input has neither a schema field nor publisher sets".into());
     };
